@@ -3,13 +3,17 @@
 
 #include "core/core_types.h"
 
+typedef struct {
+    volatile uint32_t *systemTickCounter;
+} RPVC_TimeConfig_t;
+
 RPVC_EXTERN_C_BEGIN
 
-void RPVC_TIME_Init(void);
+RPVC_Status_t RPVC_TIME_Init(const RPVC_TimeConfig_t *config);
 
 void RPVC_TIME_Deinit(void);
 
-void RPVC_TIME_Configure(volatile uint32_t* systemTickCounter);
+bool RPVC_TIME_IsInitialized(void);
 
 uint32_t RPVC_TIME_GetSystemTick(void);
 

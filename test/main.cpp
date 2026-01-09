@@ -1,4 +1,4 @@
-#include "repvicore/repvicore.h"
+#include "repvicore.h"
 
 int main() {
     RPVC_Init();

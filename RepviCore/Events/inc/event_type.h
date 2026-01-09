@@ -3,9 +3,7 @@
 
 #include <stdint.h>
 
-#define RPVC_EVENT_TYPE_ID uint16_t
-
-enum : RPVC_EVENT_TYPE_ID {
+typedef enum RPVC_EventBaseId_e {
     RPVC_EVENT_NONE = 0,
 
     // Core system events
@@ -26,17 +24,17 @@ enum : RPVC_EVENT_TYPE_ID {
 
     // User-defined events start here
     RPVC_EVENT_USER_BASE = 200
-};
+} RPVC_EventBaseId_t;
+
+#define RPVC_EVENT_TYPE_ID uint32_t
 
 typedef RPVC_EVENT_TYPE_ID RPVC_EventId_t;
 
-typedef void (*RPVC_EventCallback_t)(const RPVC_EventPacket_t *eventPacket);
-
-typedef enum RPVC_EventSeverity_e : uint8_t {
-    RPVC_EVENT_INFO = 0,
-    RPVC_EVENT_WARNING = 1,
-    RPVC_EVENT_ERROR = 2,
-    RPVC_EVENT_CRITICAL = 3
+typedef enum RPVC_EventSeverity_e {
+    RPVC_SEVERITY_INFO = 0,
+    RPVC_SEVERITY_WARNING = 1,
+    RPVC_SEVERITY_ERROR = 2,
+    RPVC_SEVERITY_CRITICAL = 3
 } RPVC_EventSeverity_t;
 
 typedef struct RPVC_EventPacket_t {
@@ -45,5 +43,7 @@ typedef struct RPVC_EventPacket_t {
     RPVC_EventId_t eventId;
     uint8_t payload[32];
 } RPVC_EventPacket_t;
+
+typedef void (*RPVC_EventCallback_t)(const RPVC_EventPacket_t *eventPacket);
 
 #endif // REPVICORE_EVENT_TYPE_H

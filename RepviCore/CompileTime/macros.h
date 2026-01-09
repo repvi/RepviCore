@@ -1,5 +1,5 @@
-#ifndef CT_MACROS_H
-#define CT_MACROS_H
+#ifndef COMPILE_TIME_MACROS_H
+#define COMPILE_TIME_MACROS_H
 
 // C/C++ linkage macros
 #ifdef __cplusplus
@@ -10,4 +10,4 @@
     #define RPVC_EXTERN_C_END
 #endif
 
-#endif // CT_MACROS_H
+#endif // COMPILE_TIME_MACROS_H

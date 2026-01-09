@@ -2,12 +2,12 @@
 #define REPVICORE_CORE_ERRORS_H
 
 #include <stdint.h>
-#include "ct/ct_macros.h"
+#include "macros.h"
 #include "compile_time.h"
 
 RPVC_EXTERN_C_BEGIN
 
-typedef enum RPVC_Status_e : int32_t {
+typedef enum RPVC_Status_e {
     RPVC_OK               = 0,
     RPVC_ERR_INIT         = -1,
     RPVC_ERR_CONFIG       = -2,

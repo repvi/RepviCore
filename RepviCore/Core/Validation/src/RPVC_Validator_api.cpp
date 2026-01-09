@@ -1,6 +1,6 @@
 #include "RPVC_Validator_api.h"
 #include "RPVC_Validator.hpp"
-#include "events/EventManager.hpp"
+#include "EventManager.hpp"
 
 using namespace repvicore;
 

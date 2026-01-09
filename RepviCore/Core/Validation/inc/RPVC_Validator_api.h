@@ -2,8 +2,8 @@
 #define RPVC_VALIDATOR_API_H
 
 #include "compile_time.h"
-#include "core/core_types.h"
-#include "core/core_errors.h"
+#include "core_types.h"
+#include "event_type.h"
 
 RPVC_EXTERN_C_BEGIN
 

@@ -1,0 +1,7 @@
+#ifndef COMPILE_TIME_CONFIG_H
+#define COMPILE_TIME_CONFIG_H
+
+
+
+
+#endif // COMPILE_TIME_CONFIG_H

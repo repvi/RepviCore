@@ -1,9 +1,9 @@
 #ifndef REPVICORE_EVENT_API_H
 #define REPVICORE_EVENT_API_H
 
-#include "core/core_types.h"
-#include "core/core_errors.h"
-#include "events/event_type.h"
+#include "core_types.h"
+#include "core_errors.h"
+#include "event_type.h"
 #include "compile_time.h"
 
 RPVC_EXTERN_C_BEGIN

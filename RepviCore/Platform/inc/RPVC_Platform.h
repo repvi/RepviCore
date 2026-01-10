@@ -6,7 +6,15 @@
 
 RPVC_EXTERN_C_BEGIN
 
+void RPVC_Platform_Init(void);
 
+const char* RPVC_Platform_GetName(void);
+
+uint32_t RPVC_Platform_GetCapabilities(void);
+
+void RPVC_Platform_Yield(void);
+
+void RPVC_Platform_Idle(void);
 
 RPVC_EXTERN_C_END
 

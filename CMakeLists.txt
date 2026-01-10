@@ -45,12 +45,55 @@ target_include_directories(repvicore
         ${CMAKE_CURRENT_SOURCE_DIR}/RepviCore/Core/Validation/inc
         ${CMAKE_CURRENT_SOURCE_DIR}/RepviCore/Events/inc
         ${CMAKE_CURRENT_SOURCE_DIR}/RepviCore/Subsystems/inc
+        ${CMAKE_CURRENT_SOURCE_DIR}/RepviCore/Platform/inc
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/RepviCore/Core
         ${CMAKE_CURRENT_SOURCE_DIR}/RepviCore/Core/Validation/src
         ${CMAKE_CURRENT_SOURCE_DIR}/RepviCore/Events/src
         ${CMAKE_CURRENT_SOURCE_DIR}/RepviCore/Subsystems/src
 )
+
+set(RPVC_TARGET RepviCore) 
+add_library(${RPVC_TARGET} STATIC) 
+
+include(cmake/RPVCConfig.cmake)
+
+if(NOT RPVC_CONFIG_LOADED)
+    message(FATAL_ERROR "RPVCConfig.cmake not loaded!")
+endif()
+
+# Select HAL implementation
+if(RPVC_ARCH STREQUAL "arm")
+    add_subdirectory(RepviCore/Platform/hal/arm)
+elseif(RPVC_ARCH STREQUAL "riscv")
+    add_subdirectory(RepviCore/Platform/hal/riscv)
+elseif(RPVC_ARCH STREQUAL "xtensa")
+    add_subdirectory(RepviCore/Platform/hal/xtensa)
+elseif(RPVC_ARCH STREQUAL "x86")
+    add_subdirectory(RepviCore/Platform/hal/x86)
+endif()
+
+# Select OSAL implementation
+if(RPVC_OS STREQUAL "baremetal")
+    if(RPVC_ARCH STREQUAL "arm")
+        add_subdirectory(RepviCore/Platform/osal/baremetal/arm)
+    elseif(RPVC_ARCH STREQUAL "riscv")
+        add_subdirectory(RepviCore/Platform/osal/baremetal/riscv)
+    elseif(RPVC_ARCH STREQUAL "xtensa")
+        add_subdirectory(RepviCore/Platform/osal/baremetal/xtensa)
+    elseif(RPVC_ARCH STREQUAL "x86")
+        add_subdirectory(RepviCore/Platform/osal/baremetal/x86)
+    else()
+        message(FATAL_ERROR "Unsupported RPVC_ARCH for baremetal OSAL: ${RPVC_ARCH}")
+    endif()
+elseif(RPVC_OS STREQUAL "freertos")
+    add_subdirectory(RepviCore/Platform/osal/freertos)
+else()
+    message(FATAL_ERROR "Unsupported RPVC_OS: ${RPVC_OS}")
+endif()
+
+message(STATUS "Building RepviCore for architecture: ${RPVC_ARCH}")
+message(STATUS "Building RepviCore for OS: ${RPVC_OS}")
 
 # Compiler warnings
 if(MSVC)

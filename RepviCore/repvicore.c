@@ -1,16 +1,12 @@
 #include "repvicore.h"
-#include "core/TimeSystem/RPVC_TIME.h"
+#include "RPVC_Time.h"
 #include "event_api.h"
-
-const RPVC_TimeConfig_t timeConfig = {
-    .systemTickCounter = NULL // Replace NULL with actual system tick counter pointer
-};
 
 RPVC_Status_t RPVC_Init(void)
 {
     RPVC_Status_t status;
     
-    status = RPVC_TIME_Init(&timeConfig);
+    status = RPVC_Time_Init();
     if (status != RPVC_OK) {
         return status;
     }

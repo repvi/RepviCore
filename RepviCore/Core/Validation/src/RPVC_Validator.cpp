@@ -90,6 +90,7 @@ bool repvicore::RPVC_Validator::isPowerOfTwo(int value)
 // not implemented yet
 bool repvicore::RPVC_Validator::isPrime(int value)
 {
+    (void)value;
     return false;
 }
 
@@ -290,6 +291,7 @@ bool repvicore::RPVC_Validator::isMonotonicIncreasing(const int *arr, size_t len
         }
         prev = arr[i];
     }
+    return true;
 }
 
 bool repvicore::RPVC_Validator::isMonotonicDecreasing(const int *arr, size_t length)

@@ -1,6 +1,6 @@
 #include "event_api.h"
-#include "core/TimeSystem/RPVC_TIME.h"
 #include "EventManager.hpp"
+#include "RPVC_Time.h"
 
 using namespace repvicore;
 
@@ -8,7 +8,7 @@ static bool g_isInitialized = false;
 
 RPVC_Status_t RPVC_Event_Init(void) 
 {
-    if (!RPVC_TIME_IsInitialized()) {
+    if (!RPVC_Time_IsInitialized()) {
         return RPVC_ERR_NOT_READY;
     }
 

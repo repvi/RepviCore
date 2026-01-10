@@ -1,6 +1,7 @@
 /* ARM Cortex-M time/tick management using SysTick */
 #include "RPVC_Time.h"
 #include "RPVC_Interrupts.h"
+#include "RPVC_Time_common.h"
 #include <stdint.h>
 
 /* SysTick registers */
@@ -29,17 +30,14 @@
 #define RPVC_CPU_FREQ_HZ        48000000  /* Default 48MHz - override for your MCU */
 #endif
 
-static volatile uint32_t s_systemTicks = 0;
 static uint32_t s_tickFrequency = RPVC_SYSTICK_FREQ_HZ;
-
-/* SysTick interrupt handler - must be called from your vector table */
-void SysTick_Handler(void)
-{
-    s_systemTicks++;
-}
 
 RPVC_Status_t RPVC_Time_Init(void)
 {
+    if (RPVC_Time_IsInitialized()) {
+        return RPVC_ERR_INIT;
+    }
+
     uint32_t ticks = (RPVC_CPU_FREQ_HZ / RPVC_SYSTICK_FREQ_HZ) - 1;
     
     /* Disable SysTick during configuration */
@@ -56,22 +54,24 @@ RPVC_Status_t RPVC_Time_Init(void)
                    SysTick_CTRL_TICKINT_Msk | 
                    SysTick_CTRL_ENABLE_Msk;
     
+    RPVC_Time_SetInitialized(true);
     return RPVC_OK;
 }
 
-uint32_t RPVC_Time_GetTick(void)
-{
-    return s_systemTicks;
-}
+/* GetTick is implemented in RPVC_Time_common.c */
 
 uint64_t RPVC_Time_GetMicroseconds(void)
 {
+    if (!RPVC_Time_IsInitialized()) {
+        return 0;
+    }
+    
     uint32_t ticks;
     uint32_t reload;
     uint32_t cycles;
     
     uint32_t state = RPVC_Interrupts_EnterCritical();
-    ticks = s_systemTicks;
+    ticks = (uint32_t)RPVC_Time_GetTick64();
     reload = SysTick_LOAD;
     cycles = reload - SysTick_VAL;
     RPVC_Interrupts_ExitCritical(state);
@@ -85,23 +85,13 @@ uint64_t RPVC_Time_GetMicroseconds(void)
 
 uint64_t RPVC_Time_GetTimeMilliseconds(void)
 {
-    return (uint64_t)s_systemTicks * (1000 / RPVC_SYSTICK_FREQ_HZ);
+    if (!RPVC_Time_IsInitialized()) {
+        return 0;
+    }
+    return RPVC_Time_GetTick64() * (1000 / RPVC_SYSTICK_FREQ_HZ);
 }
 
-uint32_t RPVC_Time_TickDiff(uint32_t start, uint32_t end)
-{
-    return end - start;
-}
-
-uint64_t RPVC_Time_TimeDiffUs(uint64_t start, uint64_t end)
-{
-    return end - start;
-}
-
-uint64_t RPVC_Time_TimeDiffMs(uint64_t start, uint64_t end)
-{
-    return end - start;
-}
+/* TickDiff functions implemented in RPVC_Time_common.c */
 
 void RPVC_Time_DelayUs(uint32_t us)
 {
@@ -113,14 +103,20 @@ void RPVC_Time_DelayUs(uint32_t us)
 
 void RPVC_Time_DelayMs(uint32_t ms)
 {
-    uint32_t start = s_systemTicks;
+    if (!RPVC_Time_IsInitialized()) {
+        return;
+    }
+    uint32_t start = RPVC_Time_GetTick();
     uint32_t target = ms * RPVC_SYSTICK_FREQ_HZ / 1000;
-    while((s_systemTicks - start) < target) {
+    while((RPVC_Time_GetTick() - start) < target) {
         __asm volatile ("wfi");
     }
 }
 
 uint32_t RPVC_Time_GetTickFrequency(void)
 {
+    if (!RPVC_Time_IsInitialized()) {
+        return 0;
+    }
     return s_tickFrequency;
 }

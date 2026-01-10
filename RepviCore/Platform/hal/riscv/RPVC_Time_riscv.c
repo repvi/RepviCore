@@ -1,6 +1,7 @@
 /* RISC-V time/tick management using machine timer */
 #include "RPVC_Time.h"
 #include "RPVC_Interrupts.h"
+#include "RPVC_Time_common.h"
 #include <stdint.h>
 
 /* RISC-V CSR access */
@@ -20,28 +21,13 @@
 #define RPVC_RISCV_TICK_HZ      1000     /* 1ms tick */
 #endif
 
-static volatile uint32_t s_systemTicks = 0;
 static uint32_t s_tickFrequency = RPVC_RISCV_TICK_HZ;
-
-/* Machine timer interrupt handler - must be called from trap handler */
-void mtimer_handler(void)
-{
-    s_systemTicks++;
-    
-    /* Schedule next interrupt */
-    uint64_t next = read_csr(mtime) + (RPVC_RISCV_TIMEBASE_HZ / RPVC_RISCV_TICK_HZ);
-    
-#if __riscv_xlen == 32
-    write_csr(mtimecmph, (uint32_t)(next >> 32));
-    write_csr(mtimecmp, (uint32_t)next);
-#else
-    write_csr(mtimecmp, next);
-#endif
-}
 
 RPVC_Status_t RPVC_Time_Init(void)
 {
-    s_systemTicks = 0;
+    if (RPVC_Time_IsInitialized()) {
+        return RPVC_ERR_INIT;
+    }
     
     /* Set initial mtimecmp */
     uint64_t interval = RPVC_RISCV_TIMEBASE_HZ / RPVC_RISCV_TICK_HZ;
@@ -59,16 +45,17 @@ RPVC_Status_t RPVC_Time_Init(void)
     /* Enable machine timer interrupt in mie */
     write_csr(mie, read_csr(mie) | (1 << 7));  /* MTIE bit */
     
+    RPVC_Time_SetInitialized(true);
     return RPVC_OK;
 }
 
-uint32_t RPVC_Time_GetTick(void)
-{
-    return s_systemTicks;
-}
+/* GetTick is implemented in RPVC_Time_common.c */
 
 uint64_t RPVC_Time_GetMicroseconds(void)
 {
+    if (!RPVC_Time_IsInitialized()) {
+        return 0;
+    }
 #if __riscv_xlen == 32
     uint32_t high, low;
     do {
@@ -88,20 +75,7 @@ uint64_t RPVC_Time_GetTimeMilliseconds(void)
     return RPVC_Time_GetMicroseconds() / 1000;
 }
 
-uint32_t RPVC_Time_TickDiff(uint32_t start, uint32_t end)
-{
-    return end - start;
-}
-
-uint64_t RPVC_Time_TimeDiffUs(uint64_t start, uint64_t end)
-{
-    return end - start;
-}
-
-uint64_t RPVC_Time_TimeDiffMs(uint64_t start, uint64_t end)
-{
-    return end - start;
-}
+/* TickDiff functions implemented in RPVC_Time_common.c */
 
 void RPVC_Time_DelayUs(uint32_t us)
 {
@@ -113,10 +87,15 @@ void RPVC_Time_DelayUs(uint32_t us)
 
 void RPVC_Time_DelayMs(uint32_t ms)
 {
-    RPVC_Time_DelayUs(ms * 1000);
+    if (g_RPVC_Time_Initialized) {
+        RPVC_Time_DelayUs(ms * 1000);
+    }
 }
 
 uint32_t RPVC_Time_GetTickFrequency(void)
 {
+    if (!RPVC_Time_IsInitialized()) {
+        return 0;
+    }
     return s_tickFrequency;
 }

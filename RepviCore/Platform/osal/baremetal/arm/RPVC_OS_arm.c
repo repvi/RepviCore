@@ -5,10 +5,16 @@
 #include <stdint.h>
 
 /* Baremetal implementation - no RTOS support */
+static bool g_RPVC_OS_Initialized = false;
 
-void RPVC_OS_Init(void)
+RPVC_Status_t RPVC_OS_Init(void)
 {
+    if (g_RPVC_OS_Initialized) {
+        return RPVC_ERR_INIT;
+    }
     /* Nothing to initialize for baremetal */
+    g_RPVC_OS_Initialized = true;
+    return RPVC_OK;
 }
 
 /* Task API - Not supported in baremetal */

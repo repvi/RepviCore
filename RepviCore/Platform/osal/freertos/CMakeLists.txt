@@ -1,5 +1,3 @@
-set(PLATFORM_OSAL_SOURCES
+target_sources(${RPVC_TARGET} PRIVATE
     RPVC_OS_freertos.c
 )
-
-target_sources(RepviCore PRIVATE ${PLATFORM_OSAL_SOURCES})

@@ -19,12 +19,47 @@
     
     static inline uint32_t pushfd_popfd(void) {
         uint32_t flags;
-        __asm__ volatile("pushf; pop %0" : "=r"(flags) :: "memory");
+#if defined(__x86_64__)
+        uint64_t flags64;
+        __asm__ volatile (
+            "pushfq\n\t"
+            "popq %0"
+            : "=r"(flags64)
+            :
+            : "memory"
+        );
+
+        flags = (uint32_t)flags64;
+#else
+        __asm__ volatile (
+            "pushfl\n\t"
+            "popl %0"
+            : "=r"(flags)
+            :
+            : "memory"
+        );
+#endif
         return flags;
     }
     
     static inline void push_popfd(uint32_t flags) {
-        __asm__ volatile("push %0; popf" :: "r"(flags) : "memory", "cc");
+#if defined(__x86_64__)
+        uint64_t flags64 = (uint64_t)flags;
+        __asm__ volatile(
+            "pushq %0\n\t"
+            "popfq"
+            :: "r"(flags64)
+            : "memory", "cc"
+        );
+#else
+        __asm__ volatile (
+            "pushl %0\n\t"
+            "popfl"
+            :
+            : "r"(flags)
+            : "memory", "cc"
+        );
+#endif
     }
 #endif
 

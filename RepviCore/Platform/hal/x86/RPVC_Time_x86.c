@@ -1,6 +1,7 @@
 /* x86/x64 time/tick management */
 #include "RPVC_Time.h"
 #include "RPVC_Interrupts.h"
+#include "RPVC_Time_common.h"
 #include <stdint.h>
 
 #if defined(_MSC_VER)
@@ -16,7 +17,6 @@
 #define RPVC_X86_TICK_HZ        1000           /* 1ms tick */
 #endif
 
-static volatile uint32_t s_systemTicks = 0;
 static uint32_t s_tickFrequency = RPVC_X86_TICK_HZ;
 static uint64_t s_tscFrequency = RPVC_X86_TSC_FREQ_HZ;
 
@@ -34,29 +34,26 @@ static inline uint64_t rdtsc(void)
 #endif
 }
 
-/* Timer interrupt handler - must be called from PIT/APIC timer ISR */
-void x86_timer_handler(void)
-{
-    s_systemTicks++;
-}
-
 RPVC_Status_t RPVC_Time_Init(void)
 {
-    s_systemTicks = 0;
+    if (RPVC_Time_IsInitialized()) {
+        return RPVC_ERR_INIT;
+    }
     
     /* Platform-specific timer setup (PIT, APIC, HPET) would go here */
     /* This is a simplified implementation */
     
+    RPVC_Time_SetInitialized(true);
     return RPVC_OK;
 }
 
-uint32_t RPVC_Time_GetTick(void)
-{
-    return s_systemTicks;
-}
+/* GetTick is implemented in RPVC_Time_common.c */
 
 uint64_t RPVC_Time_GetMicroseconds(void)
 {
+    if (!RPVC_Time_IsInitialized()) {
+        return 0;
+    }
     uint64_t tsc = rdtsc();
     return (tsc * 1000000ULL) / s_tscFrequency;
 }
@@ -66,23 +63,13 @@ uint64_t RPVC_Time_GetTimeMilliseconds(void)
     return RPVC_Time_GetMicroseconds() / 1000;
 }
 
-uint32_t RPVC_Time_TickDiff(uint32_t start, uint32_t end)
-{
-    return end - start;
-}
-
-uint64_t RPVC_Time_TimeDiffUs(uint64_t start, uint64_t end)
-{
-    return end - start;
-}
-
-uint64_t RPVC_Time_TimeDiffMs(uint64_t start, uint64_t end)
-{
-    return end - start;
-}
+/* TickDiff functions implemented in RPVC_Time_common.c */
 
 void RPVC_Time_DelayUs(uint32_t us)
 {
+    if (!RPVC_Time_IsInitialized()) {
+        return;
+    }
     uint64_t start = RPVC_Time_GetMicroseconds();
     while ((RPVC_Time_GetMicroseconds() - start) < us) {
 #if defined(_MSC_VER)
@@ -100,5 +87,8 @@ void RPVC_Time_DelayMs(uint32_t ms)
 
 uint32_t RPVC_Time_GetTickFrequency(void)
 {
+    if (!RPVC_Time_IsInitialized()) {
+        return 0;
+    }
     return s_tickFrequency;
 }

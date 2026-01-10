@@ -18,10 +18,7 @@ add_library(repvicore STATIC
     
     # Core
     RepviCore/Core/core_api.cpp
-    
-    # Time System
-    RepviCore/Core/TimeSystem/RPVC_TIME.c
-    
+        
     # Validation
     RepviCore/Core/Validation/src/RPVC_Validator_api.cpp
     RepviCore/Core/Validation/src/RPVC_Validator.cpp
@@ -33,6 +30,9 @@ add_library(repvicore STATIC
     # Subsystems
     RepviCore/Subsystems/src/logging_impl.cpp
     RepviCore/Subsystems/src/messaging_impl.cpp
+    
+    # Platform Common (internal)
+    RepviCore/Platform/src/RPVC_Time_common.c
 )
 
 # Include directories
@@ -51,10 +51,12 @@ target_include_directories(repvicore
         ${CMAKE_CURRENT_SOURCE_DIR}/RepviCore/Core/Validation/src
         ${CMAKE_CURRENT_SOURCE_DIR}/RepviCore/Events/src
         ${CMAKE_CURRENT_SOURCE_DIR}/RepviCore/Subsystems/src
+        ${CMAKE_CURRENT_SOURCE_DIR}/RepviCore/Platform/src
 )
 
-set(RPVC_TARGET RepviCore) 
-add_library(${RPVC_TARGET} STATIC) 
+set(RPVC_TARGET repvicore CACHE INTERNAL "RepviCore target")
+
+#add_library(${RPVC_TARGET} STATIC) 
 
 include(cmake/RPVCConfig.cmake)
 

@@ -8,8 +8,17 @@ const RPVC_TimeConfig_t timeConfig = {
 
 RPVC_Status_t RPVC_Init(void)
 {
-    RPVC_TIME_Init(&timeConfig);
-    RPVC_Event_Init();
+    RPVC_Status_t status;
+    
+    status = RPVC_TIME_Init(&timeConfig);
+    if (status != RPVC_OK) {
+        return status;
+    }
+
+    status = RPVC_Event_Init();
+    if (status != RPVC_OK) {
+        return status;
+    }
 
     return RPVC_OK; // Added return statement
 }

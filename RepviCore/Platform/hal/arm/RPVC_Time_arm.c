@@ -21,25 +21,20 @@
 #define SysTick_CTRL_TICKINT_Msk     (1UL << SysTick_CTRL_TICKINT_Pos)
 #define SysTick_CTRL_CLKSOURCE_Msk   (1UL << SysTick_CTRL_CLKSOURCE_Pos)
 
-/* Configuration - adjust based on your system clock */
-#ifndef RPVC_SYSTICK_FREQ_HZ
-#define RPVC_SYSTICK_FREQ_HZ    1000  /* 1ms tick rate */
-#endif
+static uint32_t g_tickFrequency = 0;
 
-#ifndef RPVC_CPU_FREQ_HZ
-#define RPVC_CPU_FREQ_HZ        48000000  /* Default 48MHz - override for your MCU */
-#endif
-
-static uint32_t s_tickFrequency = RPVC_SYSTICK_FREQ_HZ;
-
-RPVC_Status_t RPVC_Time_Init(void)
+RPVC_Status_t RPVC_Time_Init(const RPVC_TimeConfig_t *config)
 {
     if (RPVC_Time_IsInitialized()) {
         return RPVC_ERR_INIT;
     }
 
-    uint32_t ticks = (RPVC_CPU_FREQ_HZ / RPVC_SYSTICK_FREQ_HZ) - 1;
-    
+    if (config == NULL) {
+        return RPVC_ERR_INVALID_ARG;
+    }
+
+    uint32_t ticks = (config->systemHz / config->tickHz) - 1;
+    g_tickFrequency = config->tickHz;
     /* Disable SysTick during configuration */
     SysTick_CTRL = 0;
     
@@ -60,63 +55,100 @@ RPVC_Status_t RPVC_Time_Init(void)
 
 /* GetTick is implemented in RPVC_Time_common.c */
 
-uint64_t RPVC_Time_GetMicroseconds(void)
+RPVC_Status_t RPVC_Time_GetMicroseconds(uint64_t *outUs)
 {
     if (!RPVC_Time_IsInitialized()) {
-        return 0;
+        return RPVC_ERR_INIT;
+    }
+
+    if (outUs == NULL) {
+        return RPVC_ERR_INVALID_ARG;
     }
     
-    uint32_t ticks;
     uint32_t reload;
     uint32_t cycles;
+    uint64_t ticks;
     
     uint32_t state = RPVC_Interrupts_EnterCritical();
-    ticks = (uint32_t)RPVC_Time_GetTick64();
+    RPVC_Status_t status = RPVC_Time_GetTick64(&ticks);
+    if (status != RPVC_OK) {
+        RPVC_Interrupts_ExitCritical(state);
+        return status;
+    }
     reload = SysTick_LOAD;
     cycles = reload - SysTick_VAL;
     RPVC_Interrupts_ExitCritical(state);
     
     /* Convert to microseconds */
-    uint64_t us = (uint64_t)ticks * (1000000 / RPVC_SYSTICK_FREQ_HZ);
-    us += (uint64_t)cycles * 1000000 / RPVC_CPU_FREQ_HZ;
+    uint64_t us = ticks * (1000000 / g_tickFrequency);
+    us += (uint64_t)cycles * 1000000 / (g_tickFrequency * reload);
     
-    return us;
+    *outUs = us;
+    return RPVC_OK;
 }
 
-uint64_t RPVC_Time_GetTimeMilliseconds(void)
+RPVC_Status_t RPVC_Time_GetTimeMilliseconds(uint64_t *outMs)
 {
     if (!RPVC_Time_IsInitialized()) {
-        return 0;
+        return RPVC_ERR_INIT;
     }
-    return RPVC_Time_GetTick64() * (1000 / RPVC_SYSTICK_FREQ_HZ);
+
+    if (outMs == NULL) {
+        return RPVC_ERR_INVALID_ARG;
+    }
+
+    uint64_t ticks;
+    RPVC_Status_t status = RPVC_Time_GetTick64(&ticks);
+    if (status != RPVC_OK) {
+        return status;
+    }
+
+    *outMs = ticks * (1000 / g_tickFrequency);
+    return RPVC_OK;
 }
 
 /* TickDiff functions implemented in RPVC_Time_common.c */
 
-void RPVC_Time_DelayUs(uint32_t us)
+RPVC_Status_t RPVC_Time_DelayUs(uint32_t us)
 {
-    uint64_t start = RPVC_Time_GetMicroseconds();
-    while((RPVC_Time_GetMicroseconds() - start) < us) {
+    if (!RPVC_Time_IsInitialized()) {
+        return RPVC_ERR_INIT;
+    }
+
+    uint64_t start;
+    RPVC_Status_t status = RPVC_Time_GetMicroseconds(&start);
+    if (status != RPVC_OK) {
+        return status;
+    }
+
+    while (1) {
+        uint64_t current;
+        status = RPVC_Time_GetMicroseconds(&current);
+        if (status != RPVC_OK) {
+            return status;
+        }
+        if ((current - start) >= us) {
+            break;
+        }
         __asm__ volatile ("nop");
     }
+
+    return RPVC_OK;
 }
 
-void RPVC_Time_DelayMs(uint32_t ms)
+RPVC_Status_t RPVC_Time_DelayMs(uint32_t ms)
 {
-    if (!RPVC_Time_IsInitialized()) {
-        return;
-    }
-    uint32_t start = RPVC_Time_GetTick();
-    uint32_t target = ms * RPVC_SYSTICK_FREQ_HZ / 1000;
-    while((RPVC_Time_GetTick() - start) < target) {
-        __asm__ volatile ("wfi");
-    }
+    return RPVC_Time_DelayUs(ms * 1000);
 }
 
-uint32_t RPVC_Time_GetTickFrequency(void)
+RPVC_Status_t RPVC_Time_GetTickFrequency(uint32_t *outFrequency)
 {
     if (!RPVC_Time_IsInitialized()) {
-        return 0;
+        return RPVC_ERR_INIT;
     }
-    return s_tickFrequency;
+    if (outFrequency == NULL) {
+        return RPVC_ERR_INVALID_ARG;
+    }
+    *outFrequency = g_tickFrequency;
+    return RPVC_OK;
 }

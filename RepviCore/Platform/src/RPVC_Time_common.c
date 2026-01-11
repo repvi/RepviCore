@@ -32,18 +32,29 @@ bool RPVC_Time_IsInitialized(void)
 }
 
 /* Get current tick count (64-bit) */
-uint64_t RPVC_Time_GetTick64(void)
+RPVC_Status_t RPVC_Time_GetTick64(uint64_t *outTick)
 {
-    return s_rpvcTick;
+    if (outTick == NULL) {
+        return RPVC_ERR_INVALID_ARG;
+    }
+    if (!g_RPVC_Time_Initialized) {
+        return RPVC_ERR_INIT;
+    }
+    *outTick = s_rpvcTick;
+    return RPVC_OK;
 }
 
 /* Get current tick count (32-bit) */
-uint32_t RPVC_Time_GetTick(void)
+RPVC_Status_t RPVC_Time_GetTick(uint32_t *outTick)
 {
-    if (!g_RPVC_Time_Initialized) {
-        return 0;
+    if (outTick == NULL) {
+        return RPVC_ERR_INVALID_ARG;
     }
-    return (uint32_t)s_rpvcTick;
+    if (!g_RPVC_Time_Initialized) {
+        return RPVC_ERR_INIT;
+    }
+    *outTick = (uint32_t)s_rpvcTick;
+    return RPVC_OK;
 }
 
 /* Tick difference calculation */

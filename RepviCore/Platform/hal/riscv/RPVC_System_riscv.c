@@ -26,6 +26,9 @@ RPVC_Status_t RPVC_System_Init(void)
 
 RPVC_Status_t RPVC_System_Deinit(void)
 {
+    if (!s_systemInitialized) {
+        return RPVC_ERR_INIT;
+    }
     s_systemInitialized = 0;
     return RPVC_OK;
 }
@@ -81,8 +84,11 @@ uint32_t RPVC_System_GetCPUID(void)
     return (uint32_t)read_csr(mhartid);
 }
 
-uint32_t RPVC_System_GetCycleCount(void)
+RPVC_Status_t RPVC_System_GetCycleCount(uint32_t *cycleCount)
 {
+    if (cycleCount == NULL) {
+        return RPVC_ERR_INVALID_ARG;
+    }
 #if __riscv_xlen == 32
     /* For RV32, need to read cycleh and cycle carefully for overflow */
     uint32_t high, low;
@@ -90,8 +96,10 @@ uint32_t RPVC_System_GetCycleCount(void)
         high = (uint32_t)read_csr(mcycleh);
         low = (uint32_t)read_csr(mcycle);
     } while (high != (uint32_t)read_csr(mcycleh));
-    return low; /* Return lower 32 bits */
+    *cycleCount = low; /* Return lower 32 bits */
+    return RPVC_OK;
 #else
-    return (uint32_t)read_csr(mcycle);
+    *cycleCount = (uint32_t)read_csr(mcycle);
+    return RPVC_OK;
 #endif
 }

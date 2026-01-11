@@ -3,16 +3,16 @@
 #include "RPVC_Interrupts.h"
 #include <stdint.h>
 
-static bool s_platformInitialized = false;
+static bool g_platformInitialized = false;
 
 RPVC_Status_t RPVC_Platform_Init(void)
 {
-    if (s_platformInitialized) {
+    if (g_platformInitialized) {
         return RPVC_ERR_INIT;
     }
     /* Platform-specific initialization */
     /* Configure system clocks, peripherals, etc. */
-    s_platformInitialized = true;
+    g_platformInitialized = true;
     return RPVC_OK;
 }
 

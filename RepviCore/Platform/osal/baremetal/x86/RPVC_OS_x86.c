@@ -35,10 +35,10 @@ void RPVC_OS_TaskYield(void)
     /* No scheduler - do nothing */
 }
 
-void RPVC_OS_TaskSleep(uint32_t ms)
+ RPVC_Status_t RPVC_OS_TaskSleep(uint32_t ms)
 {
     /* Use platform delay instead */
-    RPVC_Time_DelayMs(ms);
+    return RPVC_Time_DelayMs(ms);
 }
 
 /* Mutex API - Not supported in baremetal */
@@ -119,14 +119,18 @@ int RPVC_OS_QueueReceive(
 }
 
 /* Time API - Wrapper around platform time functions */
-uint32_t RPVC_OS_GetTick(void)
+RPVC_Status_t RPVC_OS_GetTick(uint32_t *outTick)
 {
-    return RPVC_Time_GetTick();
+    return RPVC_Time_GetTick(outTick);
 }
 
-uint64_t RPVC_OS_GetTimeMicroseconds(void)
+RPVC_Status_t RPVC_OS_GetTimeMicroseconds(uint64_t *outUs)
 {
-    return RPVC_Time_GetMicroseconds();
+    if (outUs == NULL) {
+        return RPVC_ERR_INVALID_ARG;
+    }
+    RPVC_Status_t status = RPVC_Time_GetMicroseconds(outUs);
+    return status;
 }
 
 /* Optional OS Hooks */

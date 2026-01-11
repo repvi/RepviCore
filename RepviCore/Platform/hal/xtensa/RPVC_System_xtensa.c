@@ -23,6 +23,9 @@ RPVC_Status_t RPVC_System_Init(void)
 
 RPVC_Status_t RPVC_System_Deinit(void)
 {
+    if (!s_systemInitialized) {
+        return RPVC_ERR_INIT;
+    }
     s_systemInitialized = 0;
     return RPVC_OK;
 }
@@ -67,9 +70,13 @@ uint32_t RPVC_System_GetCPUID(void)
     return prid;
 }
 
-uint32_t RPVC_System_GetCycleCount(void)
+RPVC_Status_t RPVC_System_GetCycleCount(uint32_t *cycleCount)
 {
+    if (cycleCount == NULL) {
+        return RPVC_ERR_INVALID_ARG;
+    }
     uint32_t ccount;
     RSR(CCOUNT, ccount);
-    return ccount;
+    *cycleCount = ccount;
+    return RPVC_OK;
 }

@@ -18,6 +18,8 @@ RPVC_Status_t RPVC_Platform_Init(void)
     s_platformInitialized = true;
     
     /* x86 platform-specific initialization */
+
+    return RPVC_OK;
 }
 
 RPVC_Status_t RPVC_Platform_GetName(const char **name)

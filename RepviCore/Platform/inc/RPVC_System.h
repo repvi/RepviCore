@@ -18,7 +18,7 @@ RPVC_Status_t RPVC_System_GetCPUName(const char **cpuName);
 
 uint32_t RPVC_System_GetCPUID(void);
 
-uint32_t RPVC_System_GetCycleCount(void);
+RPVC_Status_t RPVC_System_GetCycleCount(uint32_t *cycleCount);
 
 RPVC_EXTERN_C_END
 

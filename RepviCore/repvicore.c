@@ -6,7 +6,12 @@ RPVC_Status_t RPVC_Init(void)
 {
     RPVC_Status_t status;
     
-    status = RPVC_Time_Init();
+    RPVC_TimeConfig_t timeConfig = {
+        .systemHz = 1000000, // Example system frequency in Hz
+        .tickHz = 1000       // Example tick frequency in Hz
+    };
+    
+    status = RPVC_Time_Init(&timeConfig);
     if (status != RPVC_OK) {
         return status;
     }

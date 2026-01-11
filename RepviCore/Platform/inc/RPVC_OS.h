@@ -28,7 +28,7 @@ int  RPVC_OS_TaskCreate(
 );
 
 void RPVC_OS_TaskYield(void);
-void RPVC_OS_TaskSleep(uint32_t ms);
+RPVC_Status_t RPVC_OS_TaskSleep(uint32_t ms);
 
 // -----------------------------------------------------------------------------
 // Mutex API
@@ -74,8 +74,8 @@ int RPVC_OS_QueueReceive(
 // -----------------------------------------------------------------------------
 // Time API
 // -----------------------------------------------------------------------------
-uint32_t RPVC_OS_GetTick(void);
-uint64_t RPVC_OS_GetTimeMicroseconds(void);
+RPVC_Status_t RPVC_OS_GetTick(uint32_t *outTick);
+RPVC_Status_t RPVC_OS_GetTimeMicroseconds(uint64_t *outUs);
 
 // -----------------------------------------------------------------------------
 // Optional OS Hooks

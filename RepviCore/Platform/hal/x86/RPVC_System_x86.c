@@ -41,6 +41,9 @@ RPVC_Status_t RPVC_System_Init(void)
 
 RPVC_Status_t RPVC_System_Deinit(void)
 {
+    if (!s_systemInitialized) {
+        return RPVC_ERR_INIT;
+    }
     s_systemInitialized = 0;
     return RPVC_OK;
 }
@@ -108,15 +111,21 @@ uint32_t RPVC_System_GetCPUID(void)
     return eax;
 }
 
-uint32_t RPVC_System_GetCycleCount(void)
+RPVC_Status_t RPVC_System_GetCycleCount(uint32_t *cycleCount)
 {
+    if (cycleCount == NULL) {
+        return RPVC_ERR_INVALID_ARG;
+    }
 #if defined(_MSC_VER)
-    return (uint32_t)__rdtsc();
+    *cycleCount = (uint32_t)__rdtsc();
+    return RPVC_OK;
 #elif defined(__GNUC__) || defined(__clang__)
     uint32_t lo, hi;
     __asm__ volatile("rdtsc" : "=a"(lo), "=d"(hi));
-    return lo;
+    *cycleCount = lo;
+    return RPVC_OK;
 #else
-    return 0;
+    *cycleCount = 0;
+    return RPVC_ERR_NOT_READY;
 #endif
 }

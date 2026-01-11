@@ -19,7 +19,7 @@
 #define CoreDebug_DEMCR     (*(volatile uint32_t*)(CoreDebug_BASE + 0x0C))
 #define CoreDebug_TRCENA    (1UL << 24)
 
-static uint8_t s_systemInitialized = 0;
+static bool s_systemInitialized = false;
 
 RPVC_Status_t RPVC_System_Init(void)
 {
@@ -34,13 +34,16 @@ RPVC_Status_t RPVC_System_Init(void)
     DWT_CTRL |= DWT_CYCCNTENA;
 #endif
 
-    s_systemInitialized = 1;
+    s_systemInitialized = true;
     return RPVC_OK;
 }
 
 RPVC_Status_t RPVC_System_Deinit(void)
 {
-    s_systemInitialized = 0;
+    if (!s_systemInitialized) {
+        return RPVC_ERR_INIT;
+    }
+    s_systemInitialized = false;
     return RPVC_OK;
 }
 
@@ -61,23 +64,27 @@ void RPVC_System_Reset(void)
     }
 }
 
-const char* RPVC_System_GetCPUName(void)
+RPVC_Status_t RPVC_System_GetCPUName(const char **cpuName)
 {
+    if (cpuName == NULL) {
+        return RPVC_ERR_INVALID_ARG;
+    }
+    
     uint32_t cpuid = SCB_CPUID;
     uint32_t partno = (cpuid >> 4) & 0xFFF;
     
     switch(partno) {
-        case 0xC20: return "Cortex-M0";
-        case 0xC60: return "Cortex-M0+";
-        case 0xC21: return "Cortex-M1";
-        case 0xC23: return "Cortex-M3";
-        case 0xC24: return "Cortex-M4";
-        case 0xC27: return "Cortex-M7";
-        case 0xD20: return "Cortex-M23";
-        case 0xD21: return "Cortex-M33";
-        case 0xD22: return "Cortex-M55";
-        case 0xD23: return "Cortex-M85";
-        default:    return "ARM Cortex-M";
+        case 0xC20: *cpuName = "Cortex-M0"; return RPVC_OK;
+        case 0xC60: *cpuName = "Cortex-M0+"; return RPVC_OK;
+        case 0xC21: *cpuName = "Cortex-M1"; return RPVC_OK;
+        case 0xC23: *cpuName = "Cortex-M3"; return RPVC_OK;
+        case 0xC24: *cpuName = "Cortex-M4"; return RPVC_OK;
+        case 0xC27: *cpuName = "Cortex-M7"; return RPVC_OK;
+        case 0xD20: *cpuName = "Cortex-M23"; return RPVC_OK;
+        case 0xD21: *cpuName = "Cortex-M33"; return RPVC_OK;
+        case 0xD22: *cpuName = "Cortex-M55"; return RPVC_OK;
+        case 0xD23: *cpuName = "Cortex-M85"; return RPVC_OK;
+        default:    *cpuName = "ARM Cortex-M"; return RPVC_OK;
     }
 }
 
@@ -86,12 +93,21 @@ uint32_t RPVC_System_GetCPUID(void)
     return SCB_CPUID;
 }
 
-uint32_t RPVC_System_GetCycleCount(void)
+RPVC_Status_t RPVC_System_GetCycleCount(uint32_t *cycleCount)
 {
-#if defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7EM__) || defined(__ARM_ARCH_8M_MAIN__)
-    return DWT_CYCCNT;
+    #if defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7EM__) || defined(__ARM_ARCH_8M_MAIN__)
+    if (!s_systemInitialized) {
+        return RPVC_ERR_INIT;
+    }
+    if (cycleCount == NULL) {
+        return RPVC_ERR_INVALID_ARG;
+    }
+
+    *cycleCount = DWT_CYCCNT;
+    return RPVC_OK;
 #else
     /* Cycle counter not available on Cortex-M0/M0+ */
-    return 0;
+    *cycleCount = 0;
+    return RPVC_ERR_NOT_READY;
 #endif
 }

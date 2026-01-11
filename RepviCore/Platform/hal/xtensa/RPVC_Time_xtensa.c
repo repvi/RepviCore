@@ -18,21 +18,26 @@
 #define RPVC_XTENSA_TICK_HZ      1000       /* 1ms tick */
 #endif
 
-static uint32_t s_tickFrequency = RPVC_XTENSA_TICK_HZ;
-static uint32_t s_cyclesPerTick = 0;
+static uint32_t g_tickFrequency = 0;
+static uint32_t g_cyclesPerTick = 0;
 
-RPVC_Status_t RPVC_Time_Init(void)
+RPVC_Status_t RPVC_Time_Init(const RPVC_TimeConfig_t *config)
 {
     if (RPVC_Time_IsInitialized()) {
         return RPVC_ERR_INIT;
     }
 
-    s_cyclesPerTick = RPVC_XTENSA_CPU_FREQ_HZ / RPVC_XTENSA_TICK_HZ;
+    if (config == NULL) {
+        return RPVC_ERR_INVALID_ARG;
+    }
+
+    g_tickFrequency = config->tickHz;
+    g_cyclesPerTick = config->systemHz / config->tickHz;
     
     /* Set up CCOMPARE0 for periodic interrupts */
     uint32_t ccount;
     RSR(CCOUNT, ccount);
-    WSR(CCOMPARE0, ccount + s_cyclesPerTick);
+    WSR(CCOMPARE0, ccount + g_cyclesPerTick);
     
     /* Enable timer interrupt at level 1 */
     uint32_t intenable;
@@ -46,40 +51,66 @@ RPVC_Status_t RPVC_Time_Init(void)
 
 /* GetTick is implemented in RPVC_Time_common.c */
 
-uint64_t RPVC_Time_GetMicroseconds(void)
+RPVC_Status_t RPVC_Time_GetMicroseconds(uint64_t *outUs)
 {
     if (!RPVC_Time_IsInitialized()) {
-        return 0;
+        return RPVC_ERR_INIT;
+    }
+
+    if (outUs == NULL) {
+        return RPVC_ERR_INVALID_ARG;
     }
     
     uint32_t ccount;
-    uint32_t ticks;
+    uint64_t ticks;
     
     uint32_t state = RPVC_Interrupts_EnterCritical();
     RSR(CCOUNT, ccount);
-    ticks = (uint32_t)RPVC_Time_GetTick64();
+    RPVC_Status_t status = RPVC_Time_GetTick64(&ticks);
+    if (status != RPVC_OK) {
+        RPVC_Interrupts_ExitCritical(state);
+        return status;
+    }
     RPVC_Interrupts_ExitCritical(state);
     
     /* Convert ticks to microseconds */
-    uint64_t us = (uint64_t)ticks * (1000000 / RPVC_XTENSA_TICK_HZ);
+    uint64_t us = ticks * (1000000 / g_tickFrequency);
     
     /* Add fractional part from cycle counter */
-    us += (uint64_t)(ccount % s_cyclesPerTick) * 1000000 / RPVC_XTENSA_CPU_FREQ_HZ;
+    if (g_cyclesPerTick > 0) {
+        us += (uint64_t)(ccount % g_cyclesPerTick) * 1000000 / g_cyclesPerTick;
+    }
     
-    return us;
+    *outUs = us;
+    return RPVC_OK;
 }
 
-uint64_t RPVC_Time_GetTimeMilliseconds(void)
+RPVC_Status_t RPVC_Time_GetTimeMilliseconds(uint64_t *outMs)
 {
-    return (uint64_t)s_systemTicks * (1000 / RPVC_XTENSA_TICK_HZ);
+    if (!RPVC_Time_IsInitialized()) {
+        return RPVC_ERR_INIT;
+    }
+
+    if (outMs == NULL) {
+        return RPVC_ERR_INVALID_ARG;
+    }
+
+    uint64_t us;
+    RPVC_Status_t status = RPVC_Time_GetMicroseconds(&us);
+    if (status != RPVC_OK) {
+        return status;
+    }
+
+    *outMs = us / 1000;
+    return RPVC_OK;
 }
 
 /* TickDiff functions implemented in RPVC_Time_common.c */
 
-void RPVC_Time_DelayUs(uint32_t us)
+RPVC_Status_t RPVC_Time_DelayUs(uint32_t us)
 {
     if (!RPVC_Time_IsInitialized()) {
-        return;
+        return RPVC_ERR_INIT;
     }
     uint32_t cycles = (uint32_t)((uint64_t)us * RPVC_XTENSA_CPU_FREQ_HZ / 1000000);
     uint32_t start, current;
@@ -88,19 +119,25 @@ void RPVC_Time_DelayUs(uint32_t us)
     do {
         RSR(CCOUNT, current);
     } while ((current - start) < cycles);
+    return RPVC_OK;
 }
 
-void RPVC_Time_DelayMs(uint32_t ms)
+RPVC_Status_t RPVC_Time_DelayMs(uint32_t ms)
 {
     for (uint32_t i = 0; i < ms; i++) {
         RPVC_Time_DelayUs(1000);
     }
+    return RPVC_OK;
 }
 
-uint32_t RPVC_Time_GetTickFrequency(void)
+RPVC_Status_t RPVC_Time_GetTickFrequency(uint32_t *outFrequency)
 {
     if (!RPVC_Time_IsInitialized()) {
-        return 0;
+        return RPVC_ERR_INIT;
     }
-    return s_tickFrequency;
+    if (outFrequency == NULL) {
+        return RPVC_ERR_INVALID_ARG;
+    }
+    *outFrequency = g_tickFrequency;
+    return RPVC_OK;
 }

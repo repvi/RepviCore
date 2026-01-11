@@ -10,7 +10,7 @@
 
 static uint8_t s_systemInitialized = 0;
 
-RPVC_Status_t RPVC_System_Init(void)
+RPVC_Status_t RPVC_SYSTEM_Init(void)
 {
     if (s_systemInitialized) {
         return RPVC_OK;
@@ -21,7 +21,7 @@ RPVC_Status_t RPVC_System_Init(void)
     return RPVC_OK;
 }
 
-RPVC_Status_t RPVC_System_Deinit(void)
+RPVC_Status_t RPVC_SYSTEM_Deinit(void)
 {
     if (!s_systemInitialized) {
         return RPVC_ERR_INIT;
@@ -30,12 +30,12 @@ RPVC_Status_t RPVC_System_Deinit(void)
     return RPVC_OK;
 }
 
-void RPVC_System_Idle(void)
+void RPVC_SYSTEM_Idle(void)
 {
     __asm__ volatile ("waiti 0");
 }
 
-void RPVC_System_Reset(void)
+void RPVC_SYSTEM_Reset(void)
 {
     /* Xtensa doesn't have a standard software reset */
     /* Platform-specific implementation needed (e.g., ESP32 uses RTC_CNTL) */
@@ -44,7 +44,7 @@ void RPVC_System_Reset(void)
     }
 }
 
-RPVC_Status_t RPVC_System_GetCPUName(const char **cpuName)
+RPVC_Status_t RPVC_SYSTEM_GetCPUName(const char **cpuName)
 {
     if (cpuName == NULL) {
         return RPVC_ERR_INVALID_ARG;
@@ -63,14 +63,14 @@ RPVC_Status_t RPVC_System_GetCPUName(const char **cpuName)
     return RPVC_OK;
 }
 
-uint32_t RPVC_System_GetCPUID(void)
+uint32_t RPVC_SYSTEM_GetCPUID(void)
 {
     uint32_t prid;
     RSR(PRID, prid);
     return prid;
 }
 
-RPVC_Status_t RPVC_System_GetCycleCount(uint32_t *cycleCount)
+RPVC_Status_t RPVC_SYSTEM_GetCycleCount(uint32_t *cycleCount)
 {
     if (cycleCount == NULL) {
         return RPVC_ERR_INVALID_ARG;

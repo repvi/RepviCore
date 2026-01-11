@@ -1,0 +1,118 @@
+cmake_minimum_required(VERSION 3.15)
+
+project(RepviCore 
+    VERSION 1.0.0
+    LANGUAGES C CXX
+)
+
+# C/C++ Standards
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Platform architecture selection
+if(NOT DEFINED RPVC_ARCH)
+    # Auto-detect or default to ARM
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm")
+        set(RPVC_ARCH "arm")
+    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "riscv")
+        set(RPVC_ARCH "riscv")
+    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "xtensa")
+        set(RPVC_ARCH "xtensa")
+    else()
+        set(RPVC_ARCH "arm")
+        message(STATUS "RPVC_ARCH not specified, defaulting to: ${RPVC_ARCH}")
+    endif()
+endif()
+
+message(STATUS "Building RepviCore for architecture: ${RPVC_ARCH}")
+
+# Platform HAL sources based on architecture
+if(RPVC_ARCH STREQUAL "arm")
+    set(PLATFORM_HAL_SOURCES
+        RepviCore/Platform/hal/arm/RPVC_Interrupts_arm.c
+        RepviCore/Platform/hal/arm/RPVC_Platform_arm.c
+        RepviCore/Platform/hal/arm/RPVC_System_arm.c
+        RepviCore/Platform/hal/arm/RPVC_Time_arm.c
+    )
+elseif(RPVC_ARCH STREQUAL "riscv")
+    set(PLATFORM_HAL_SOURCES
+        RepviCore/Platform/hal/riscv/RPVC_Interrupts_riscv.c
+        RepviCore/Platform/hal/riscv/RPVC_Platform_riscv.c
+        RepviCore/Platform/hal/riscv/RPVC_System_riscv.c
+        RepviCore/Platform/hal/riscv/RPVC_Time_riscv.c
+    )
+elseif(RPVC_ARCH STREQUAL "xtensa")
+    set(PLATFORM_HAL_SOURCES
+        RepviCore/Platform/hal/xtensa/RPVC_Interrupts_xtensa.c
+        RepviCore/Platform/hal/xtensa/RPVC_Platform_xtensa.c
+        RepviCore/Platform/hal/xtensa/RPVC_System_xtensa.c
+        RepviCore/Platform/hal/xtensa/RPVC_Time_xtensa.c
+    )
+else()
+    message(FATAL_ERROR "Unsupported architecture: ${RPVC_ARCH}")
+endif()
+
+# Library target
+add_library(repvicore STATIC
+    # Main
+    RepviCore/repvicore.c
+    
+    # Core
+    RepviCore/Core/core_api.cpp
+    
+    # Time System
+    RepviCore/Core/TimeSystem/RPVC_TIME.c
+    
+    # Validation
+    RepviCore/Core/Validation/src/RPVC_Validator_api.cpp
+    RepviCore/Core/Validation/src/RPVC_Validator.cpp
+    
+    # Events
+    RepviCore/Events/src/event_api.cpp
+    RepviCore/Events/src/EventManager.cpp
+    
+    # Subsystems
+    RepviCore/Subsystems/src/logging_impl.cpp
+    RepviCore/Subsystems/src/messaging_impl.cpp
+    
+    # Platform HAL (architecture-specific)
+    ${PLATFORM_HAL_SOURCES}
+)
+
+# Include directories
+target_include_directories(repvicore
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/RepviCore
+        ${CMAKE_CURRENT_SOURCE_DIR}/RepviCore/CompileTime
+        ${CMAKE_CURRENT_SOURCE_DIR}/RepviCore/Core
+        ${CMAKE_CURRENT_SOURCE_DIR}/RepviCore/Core/TimeSystem
+        ${CMAKE_CURRENT_SOURCE_DIR}/RepviCore/Core/Validation/inc
+        ${CMAKE_CURRENT_SOURCE_DIR}/RepviCore/Events/inc
+        ${CMAKE_CURRENT_SOURCE_DIR}/RepviCore/Subsystems/inc
+        ${CMAKE_CURRENT_SOURCE_DIR}/RepviCore/Platform/inc
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/RepviCore/Core
+        ${CMAKE_CURRENT_SOURCE_DIR}/RepviCore/Core/Validation/src
+        ${CMAKE_CURRENT_SOURCE_DIR}/RepviCore/Events/src
+        ${CMAKE_CURRENT_SOURCE_DIR}/RepviCore/Subsystems/src
+        ${CMAKE_CURRENT_SOURCE_DIR}/RepviCore/Platform/hal/${RPVC_ARCH}
+)
+
+# Compiler warnings
+if(MSVC)
+    target_compile_options(repvicore PRIVATE /W4)
+else()
+    target_compile_options(repvicore PRIVATE -Wall -Wextra -Wpedantic)
+endif()
+
+# Test executable (optional)
+option(BUILD_TESTS "Build test executable" ON)
+if(BUILD_TESTS)
+    add_executable(repvicore_test
+        Test/main.cpp
+    )
+    
+    target_link_libraries(repvicore_test PRIVATE repvicore)
+endif()

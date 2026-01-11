@@ -41,19 +41,23 @@ void RPVC_System_Reset(void)
     }
 }
 
-const char* RPVC_System_GetCPUName(void)
+RPVC_Status_t RPVC_System_GetCPUName(const char **cpuName)
 {
+    if (cpuName == NULL) {
+        return RPVC_ERR_INVALID_ARG;
+    }
 #if defined(CONFIG_IDF_TARGET_ESP32)
-    return "ESP32 (Xtensa LX6)";
+    *cpuName = "ESP32 (Xtensa LX6)";
 #elif defined(CONFIG_IDF_TARGET_ESP32S2)
-    return "ESP32-S2 (Xtensa LX7)";
+    *cpuName = "ESP32-S2 (Xtensa LX7)";
 #elif defined(CONFIG_IDF_TARGET_ESP32S3)
-    return "ESP32-S3 (Xtensa LX7)";
+    *cpuName = "ESP32-S3 (Xtensa LX7)";
 #elif XCHAL_HAVE_FP
-    return "Xtensa LX7";
+    *cpuName = "Xtensa LX7";
 #else
-    return "Xtensa LX6";
+    *cpuName = "Xtensa LX6";
 #endif
+    return RPVC_OK;
 }
 
 uint32_t RPVC_System_GetCPUID(void)

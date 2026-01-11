@@ -2,40 +2,61 @@
 #include "RPVC_Platform.h"
 #include <stdint.h>
 
-void RPVC_Platform_Init(void)
+static bool s_platformInitialized = false;
+
+RPVC_Status_t RPVC_Platform_Init(void)
 {
+    if (s_platformInitialized) {
+        return RPVC_ERR_INIT;
+    }
+    s_platformInitialized = true;
+    return RPVC_OK;
     /* RISC-V platform-specific initialization */
 }
 
-const char* RPVC_Platform_GetName(void)
+RPVC_Status_t RPVC_Platform_GetName(const char **name)
 {
+    if (name == NULL) {
+        return RPVC_ERR_INVALID_ARG;
+    }
 #if __riscv_xlen == 32
-    return "RISC-V RV32";
+    *name = "RISC-V RV32";
 #elif __riscv_xlen == 64
-    return "RISC-V RV64";
+    *name = "RISC-V RV64";
 #else
-    return "RISC-V";
+    *name = "RISC-V";
 #endif
+    return RPVC_OK;
 }
 
-uint32_t RPVC_Platform_GetCapabilities(void)
+RPVC_PlatformCapabilities_t RPVC_Platform_GetCapabilities(void)
 {
-    uint32_t caps = 0;
+    RPVC_PlatformCapabilities_t caps = 0;
     
 #if defined(__riscv_mul)
-    caps |= (1 << 0); /* M extension (integer multiply/divide) */
+    caps |= RPVC_CAP_RISCV_M;  /* M extension (integer multiply/divide) */
 #endif
 
 #if defined(__riscv_atomic)
-    caps |= (1 << 1); /* A extension (atomics) */
+    caps |= RPVC_CAP_RISCV_A;  /* A extension (atomics) */
 #endif
 
 #if defined(__riscv_flen)
-    caps |= (1 << 2); /* F/D extension (floating-point) */
+    #if __riscv_flen >= 64
+        caps |= RPVC_CAP_RISCV_D;  /* D extension (double FP) */
+    #endif
+    #if __riscv_flen >= 32
+        caps |= RPVC_CAP_RISCV_F;  /* F extension (single FP) */
+    #endif
+    caps |= RPVC_CAP_HW_FPU;
 #endif
 
 #if defined(__riscv_compressed)
-    caps |= (1 << 3); /* C extension (compressed instructions) */
+    caps |= RPVC_CAP_RISCV_C;  /* C extension (compressed instructions) */
+#endif
+
+#if defined(__riscv_vector)
+    caps |= RPVC_CAP_RISCV_V;  /* V extension (vector) */
 #endif
 
     return caps;

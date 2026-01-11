@@ -14,7 +14,7 @@ void RPVC_System_Idle(void);
 
 void RPVC_System_Reset(void);
 
-const char* RPVC_System_GetCPUName(void);
+RPVC_Status_t RPVC_System_GetCPUName(const char **cpuName);
 
 uint32_t RPVC_System_GetCPUID(void);
 

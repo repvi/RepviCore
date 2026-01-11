@@ -44,31 +44,35 @@ void RPVC_System_Reset(void)
     }
 }
 
-const char* RPVC_System_GetCPUName(void)
+RPVC_Status_t RPVC_System_GetCPUName(const char **cpuName)
 {
+    if (cpuName == NULL) {
+        return RPVC_ERR_INVALID_ARG;
+    }
 #if __riscv_xlen == 32
     #if defined(__riscv_mul) && defined(__riscv_atomic) && defined(__riscv_flen)
-        return "RV32IMAF";
+        *cpuName = "RV32IMAF";
     #elif defined(__riscv_mul) && defined(__riscv_atomic)
-        return "RV32IMA";
+        *cpuName = "RV32IMA";
     #elif defined(__riscv_mul)
-        return "RV32IM";
+        *cpuName = "RV32IM";
     #else
-        return "RV32I";
+        *cpuName = "RV32I";
     #endif
 #elif __riscv_xlen == 64
     #if defined(__riscv_mul) && defined(__riscv_atomic) && defined(__riscv_flen)
-        return "RV64IMAF";
+        *cpuName = "RV64IMAF";
     #elif defined(__riscv_mul) && defined(__riscv_atomic)
-        return "RV64IMA";
+        *cpuName = "RV64IMA";
     #elif defined(__riscv_mul)
-        return "RV64IM";
+        *cpuName = "RV64IM";
     #else
-        return "RV64I";
+        *cpuName = "RV64I";
     #endif
 #else
-    return "RISC-V";
+    *cpuName = "RISC-V";
 #endif
+    return RPVC_OK;
 }
 
 uint32_t RPVC_System_GetCPUID(void)

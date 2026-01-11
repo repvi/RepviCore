@@ -87,15 +87,10 @@ void RPVC_Time_DelayUs(uint32_t us)
 
 void RPVC_Time_DelayMs(uint32_t ms)
 {
-    if (g_RPVC_Time_Initialized) {
-        RPVC_Time_DelayUs(ms * 1000);
-    }
+    RPVC_Time_DelayUs(ms * 1000);
 }
 
 uint32_t RPVC_Time_GetTickFrequency(void)
 {
-    if (!RPVC_Time_IsInitialized()) {
-        return 0;
-    }
     return s_tickFrequency;
 }

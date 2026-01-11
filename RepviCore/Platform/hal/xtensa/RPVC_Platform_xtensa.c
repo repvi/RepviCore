@@ -3,46 +3,57 @@
 #include <stdint.h>
 #include <xtensa/config/core.h>
 
-void RPVC_Platform_Init(void)
+static bool s_platformInitialized = false;
+
+RPVC_Status_t RPVC_Platform_Init(void)
 {
+    if (s_platformInitialized) {
+        return RPVC_ERR_INIT;
+    }
+    s_platformInitialized = true;
+    return RPVC_OK;
     /* Xtensa platform-specific initialization */
 }
 
-const char* RPVC_Platform_GetName(void)
+RPVC_Status_t RPVC_Platform_GetName(const char **name)
 {
+    if (name == NULL) {
+        return RPVC_ERR_INVALID_ARG;
+    }
 #if XCHAL_HAVE_FP
-    return "Xtensa LX (FPU)";
+    *name = "Xtensa LX (FPU)";
 #else
-    return "Xtensa LX";
+    *name = "Xtensa LX";
 #endif
+    return RPVC_OK;
 }
 
-uint32_t RPVC_Platform_GetCapabilities(void)
+RPVC_PlatformCapabilities_t RPVC_Platform_GetCapabilities(void)
 {
-    uint32_t caps = 0;
+    RPVC_PlatformCapabilities_t caps = 0;
     
 #if XCHAL_HAVE_FP
-    caps |= (1 << 0); /* Floating-point unit */
+    caps |= RPVC_CAP_HW_FPU;
 #endif
 
 #if XCHAL_HAVE_MAC16
-    caps |= (1 << 1); /* 16-bit MAC */
+    caps |= RPVC_CAP_XTENSA_MAC16;
 #endif
 
 #if XCHAL_HAVE_MUL32
-    caps |= (1 << 2); /* 32-bit multiply */
+    caps |= RPVC_CAP_XTENSA_MUL32;
 #endif
 
 #if XCHAL_HAVE_DIV32
-    caps |= (1 << 3); /* 32-bit divide */
+    caps |= RPVC_CAP_XTENSA_DIV32;
 #endif
 
 #if XCHAL_DCACHE_SIZE > 0
-    caps |= (1 << 4); /* Data cache */
+    caps |= RPVC_CAP_HW_DCACHE;
 #endif
 
 #if XCHAL_ICACHE_SIZE > 0
-    caps |= (1 << 5); /* Instruction cache */
+    caps |= RPVC_CAP_HW_ICACHE;
 #endif
 
     return caps;

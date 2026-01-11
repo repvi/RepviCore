@@ -7,23 +7,35 @@
     #include <intrin.h>
 #endif
 
-void RPVC_Platform_Init(void)
+static bool s_platformInitialized = false;
+
+RPVC_Status_t RPVC_Platform_Init(void)
 {
+    if (s_platformInitialized) {
+        return RPVC_ERR_INIT;
+    }
+
+    s_platformInitialized = true;
+    
     /* x86 platform-specific initialization */
 }
 
-const char* RPVC_Platform_GetName(void)
+RPVC_Status_t RPVC_Platform_GetName(const char **name)
 {
+    if (name == NULL) {
+        return RPVC_ERR_INVALID_ARG;
+    }
 #if defined(__x86_64__) || defined(_M_X64)
-    return "x86-64";
+    *name = "x86-64";
 #else
-    return "x86";
+    *name = "x86";
 #endif
+    return RPVC_OK;
 }
 
-uint32_t RPVC_Platform_GetCapabilities(void)
+RPVC_PlatformCapabilities_t RPVC_Platform_GetCapabilities(void)
 {
-    uint32_t caps = 0;
+    RPVC_PlatformCapabilities_t caps = 0;
     uint32_t eax, ebx, ecx, edx;
     
     /* Check CPUID support */
@@ -40,15 +52,33 @@ uint32_t RPVC_Platform_GetCapabilities(void)
     );
 #endif
     
-    /* Check for various extensions */
-    if (edx & (1 << 23)) caps |= (1 << 0); /* MMX */
-    if (edx & (1 << 25)) caps |= (1 << 1); /* SSE */
-    if (edx & (1 << 26)) caps |= (1 << 2); /* SSE2 */
-    if (ecx & (1 << 0))  caps |= (1 << 3); /* SSE3 */
-    if (ecx & (1 << 9))  caps |= (1 << 4); /* SSSE3 */
-    if (ecx & (1 << 19)) caps |= (1 << 5); /* SSE4.1 */
-    if (ecx & (1 << 20)) caps |= (1 << 6); /* SSE4.2 */
-    if (ecx & (1 << 28)) caps |= (1 << 7); /* AVX */
+    /* CPUID leaf 1: Basic feature flags */
+    if (edx & (1 << 23)) caps |= RPVC_CAP_SIMD_MMX;
+    if (edx & (1 << 25)) caps |= RPVC_CAP_SIMD_SSE;
+    if (edx & (1 << 26)) caps |= RPVC_CAP_SIMD_SSE2;
+    if (ecx & (1 << 0))  caps |= RPVC_CAP_SIMD_SSE3;
+    if (ecx & (1 << 9))  caps |= RPVC_CAP_SIMD_SSSE3;
+    if (ecx & (1 << 19)) caps |= RPVC_CAP_SIMD_SSE41;
+    if (ecx & (1 << 20)) caps |= RPVC_CAP_SIMD_SSE42;
+    if (ecx & (1 << 28)) caps |= RPVC_CAP_SIMD_AVX;
+    
+    /* Check extended features (CPUID leaf 7) */
+#if defined(_MSC_VER)
+    __cpuidex(cpuInfo, 7, 0);
+    ebx = cpuInfo[1];
+#elif defined(__GNUC__) || defined(__clang__)
+    __asm__ volatile(
+        "cpuid"
+        : "=a"(eax), "=b"(ebx), "=c"(ecx), "=d"(edx)
+        : "a"(7), "c"(0)
+    );
+#endif
+    
+    if (ebx & (1 << 5))  caps |= RPVC_CAP_SIMD_AVX2;
+    if (ebx & (1 << 16)) caps |= RPVC_CAP_SIMD_AVX512;
+    
+    /* x86 always has FPU in modern processors */
+    caps |= RPVC_CAP_HW_FPU;
     
     return caps;
 }

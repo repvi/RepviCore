@@ -4,20 +4,23 @@
 
 #if defined(_MSC_VER)
     #include <intrin.h>
-    #define cli() __asm cli
-    #define sti() __asm sti
-    #define pushfd_popfd(val) __asm { pushfd; pop val }
-    #define push_popfd(val) __asm { push val; popfd }
+    #define cli() __asm__ cli
+    #define sti() __asm__ sti
+    #define pushfd_popfd(val) __asm__ { pushfd; pop val }
+    #define push_popfd(val) __asm__ { push val; popfd }
 #elif defined(__GNUC__) || defined(__clang__)
-    static inline void cli(void) {
+    static inline void cli(void) 
+    {
         __asm__ volatile("cli" ::: "memory");
     }
     
-    static inline void sti(void) {
+    static inline void sti(void) 
+    {
         __asm__ volatile("sti" ::: "memory");
     }
     
-    static inline uint32_t pushfd_popfd(void) {
+    static inline uint32_t pushfd_popfd(void) 
+    {
         uint32_t flags;
 #if defined(__x86_64__)
         uint64_t flags64;
@@ -42,7 +45,8 @@
         return flags;
     }
     
-    static inline void push_popfd(uint32_t flags) {
+    static inline void push_popfd(uint32_t flags) 
+    {
 #if defined(__x86_64__)
         uint64_t flags64 = (uint64_t)flags;
         __asm__ volatile(

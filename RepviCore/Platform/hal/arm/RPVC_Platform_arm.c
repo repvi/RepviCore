@@ -3,47 +3,66 @@
 #include "RPVC_Interrupts.h"
 #include <stdint.h>
 
-void RPVC_Platform_Init(void)
+static bool s_platformInitialized = false;
+
+RPVC_Status_t RPVC_Platform_Init(void)
 {
+    if (s_platformInitialized) {
+        return RPVC_ERR_INIT;
+    }
     /* Platform-specific initialization */
     /* Configure system clocks, peripherals, etc. */
+    s_platformInitialized = true;
+    return RPVC_OK;
 }
 
-const char* RPVC_Platform_GetName(void)
+RPVC_Status_t RPVC_Platform_GetName(const char **name)
 {
+    if (name == NULL) {
+        return RPVC_ERR_INVALID_ARG;
+    }
 #if defined(__ARM_ARCH_6M__)
-    return "ARM Cortex-M0/M0+";
+    *name = "ARM Cortex-M0/M0+";
 #elif defined(__ARM_ARCH_7M__)
-    return "ARM Cortex-M3";
+    *name = "ARM Cortex-M3";
 #elif defined(__ARM_ARCH_7EM__)
     #if defined(__ARM_FEATURE_DSP) && (__ARM_FEATURE_DSP == 1)
-        return "ARM Cortex-M4F/M7";
+        *name = "ARM Cortex-M4F/M7";
     #else
-        return "ARM Cortex-M4";
+        *name = "ARM Cortex-M4";
     #endif
 #elif defined(__ARM_ARCH_8M_BASE__)
-    return "ARM Cortex-M23";
+    *name = "ARM Cortex-M23";
 #elif defined(__ARM_ARCH_8M_MAIN__)
-    return "ARM Cortex-M33/M35P";
+    *name = "ARM Cortex-M33/M35P";
 #else
-    return "ARM Cortex-M";
+    *name = "ARM Cortex-M";
 #endif
+    return RPVC_OK;
 }
 
-uint32_t RPVC_Platform_GetCapabilities(void)
+RPVC_PlatformCapabilities_t RPVC_Platform_GetCapabilities(void)
 {
-    uint32_t caps = 0;
+    RPVC_PlatformCapabilities_t caps = 0;
     
 #if defined(__ARM_FEATURE_DSP) && (__ARM_FEATURE_DSP == 1)
-    caps |= (1 << 0); /* DSP extensions */
+    caps |= RPVC_CAP_ARM_DSP;
 #endif
 
 #if defined(__ARM_FP)
-    caps |= (1 << 1); /* FPU present */
+    caps |= RPVC_CAP_HW_FPU;
+#endif
+
+#if defined(__ARM_NEON)
+    caps |= RPVC_CAP_SIMD_NEON;
 #endif
 
 #if defined(__ARM_FEATURE_MVE)
-    caps |= (1 << 2); /* M-Profile Vector Extension (Helium) */
+    caps |= RPVC_CAP_ARM_MVE;  /* Helium */
+#endif
+
+#if defined(__ARM_FEATURE_SVE)
+    caps |= RPVC_CAP_SIMD_SVE;
 #endif
 
     return caps;
@@ -52,11 +71,11 @@ uint32_t RPVC_Platform_GetCapabilities(void)
 void RPVC_Platform_Yield(void)
 {
     /* Hint to the processor that we're in a spin-wait loop */
-    __asm volatile ("yield");
+    __asm__ volatile ("yield");
 }
 
 void RPVC_Platform_Idle(void)
 {
     /* Wait for interrupt - low power mode */
-    __asm volatile ("wfi");
+    __asm__ volatile ("wfi");
 }

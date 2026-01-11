@@ -69,8 +69,11 @@ void RPVC_System_Reset(void)
     }
 }
 
-const char* RPVC_System_GetCPUName(void)
+RPVC_Status_t RPVC_System_GetCPUName(const char **cpuName)
 {
+    if (cpuName == NULL) {
+        return RPVC_ERR_INVALID_ARG;
+    }
     static char cpu_brand[49] = {0};
     uint32_t eax, ebx, ecx, edx;
     
@@ -93,7 +96,9 @@ const char* RPVC_System_GetCPUName(void)
         }
     }
     
-    return cpu_brand;
+    *cpuName = cpu_brand;
+
+    return RPVC_OK;
 }
 
 uint32_t RPVC_System_GetCPUID(void)

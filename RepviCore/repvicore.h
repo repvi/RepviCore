@@ -15,6 +15,4 @@ RPVC_Status_t RPVC_Deinit(void);
 
 RPVC_EXTERN_C_END
 
-
-
 #endif // REPVICORE_H

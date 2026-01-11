@@ -21,22 +21,26 @@
 #endif
 
 /* Inline assembly helpers for interrupt control */
-static inline uint32_t __get_PRIMASK(void) {
+static inline uint32_t __get_PRIMASK(void) 
+{
     uint32_t result;
-    __asm volatile ("MRS %0, primask" : "=r" (result));
+    __asm__ volatile ("MRS %0, primask" : "=r" (result));
     return result;
 }
 
-static inline void __set_PRIMASK(uint32_t priMask) {
-    __asm volatile ("MSR primask, %0" : : "r" (priMask) : "memory");
+static inline void __set_PRIMASK(uint32_t priMask) 
+{
+    __asm__ volatile ("MSR primask, %0" : : "r" (priMask) : "memory");
 }
 
-static inline void __enable_irq(void) {
-    __asm volatile ("cpsie i" : : : "memory");
+static inline void __enable_irq(void) 
+{
+    __asm__ volatile ("cpsie i" : : : "memory");
 }
 
-static inline void __disable_irq(void) {
-    __asm volatile ("cpsid i" : : : "memory");
+static inline void __disable_irq(void) 
+{
+    __asm__ volatile ("cpsid i" : : : "memory");
 }
 
 uint32_t RPVC_Interrupts_Enable(void)

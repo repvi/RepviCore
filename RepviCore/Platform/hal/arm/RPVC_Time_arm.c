@@ -97,7 +97,7 @@ void RPVC_Time_DelayUs(uint32_t us)
 {
     uint64_t start = RPVC_Time_GetMicroseconds();
     while((RPVC_Time_GetMicroseconds() - start) < us) {
-        __asm volatile ("nop");
+        __asm__ volatile ("nop");
     }
 }
 
@@ -109,7 +109,7 @@ void RPVC_Time_DelayMs(uint32_t ms)
     uint32_t start = RPVC_Time_GetTick();
     uint32_t target = ms * RPVC_SYSTICK_FREQ_HZ / 1000;
     while((RPVC_Time_GetTick() - start) < target) {
-        __asm volatile ("wfi");
+        __asm__ volatile ("wfi");
     }
 }
 

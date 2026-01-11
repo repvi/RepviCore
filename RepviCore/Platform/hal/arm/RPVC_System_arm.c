@@ -24,7 +24,7 @@ static uint8_t s_systemInitialized = 0;
 RPVC_Status_t RPVC_System_Init(void)
 {
     if (s_systemInitialized) {
-        return RPVC_OK;
+        return RPVC_ERR_INIT;
     }
 
     /* Enable DWT cycle counter for performance monitoring */
@@ -46,7 +46,7 @@ RPVC_Status_t RPVC_System_Deinit(void)
 
 void RPVC_System_Idle(void)
 {
-    __asm volatile ("wfi");
+    __asm__ volatile ("wfi");
 }
 
 void RPVC_System_Reset(void)
@@ -57,7 +57,7 @@ void RPVC_System_Reset(void)
     
     /* Wait for reset */
     while(1) {
-        __asm volatile ("nop");
+        __asm__ volatile ("nop");
     }
 }
 

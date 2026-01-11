@@ -1,0 +1,43 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "x86-debug",
+      "displayName": "Configure for x86 (Debug)",
+      "description": "Build for host x86/x86_64 (default)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/x86-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "RPVC_ARCH": "x86",
+        "RPVC_OS": "baremetal"
+      }
+    },
+    {
+      "name": "arm-debug",
+      "displayName": "Configure for ARM Cortex-M (Debug)",
+      "description": "Cross-compile for ARM Cortex-M using an arm-none-eabi toolchain",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/arm-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "RPVC_ARCH": "arm",
+        "RPVC_OS": "baremetal",
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/arm-none-eabi.cmake"
+      }
+    },
+    {
+      "name": "riscv-debug",
+      "displayName": "Configure for RISC-V (Debug)",
+      "description": "Cross-compile for RISC-V using a riscv-none-embed toolchain",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/riscv-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "RPVC_ARCH": "riscv",
+        "RPVC_OS": "baremetal",
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/riscv-none-embed.cmake"
+      }
+    }
+  ]
+}

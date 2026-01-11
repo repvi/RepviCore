@@ -97,6 +97,13 @@ endif()
 message(STATUS "Building RepviCore for architecture: ${RPVC_ARCH}")
 message(STATUS "Building RepviCore for OS: ${RPVC_OS}")
 
+# Architecture-specific compiler options
+if(RPVC_ARCH STREQUAL "arm")
+    if(NOT MSVC)
+        target_compile_options(repvicore PRIVATE -mthumb -mcpu=cortex-m3)
+    endif()
+endif()
+
 # Compiler warnings
 if(MSVC)
     target_compile_options(repvicore PRIVATE /W4)
@@ -106,6 +113,11 @@ endif()
 
 # Test executable (optional)
 option(BUILD_TESTS "Build test executable" ON)
+if(RPVC_ARCH STREQUAL "arm" OR RPVC_ARCH STREQUAL "riscv" OR RPVC_ARCH STREQUAL "xtensa")
+    set(BUILD_TESTS OFF CACHE BOOL "Disable host tests for cross-compilation" FORCE)
+    message(STATUS "Cross-target detected; disabling host tests")
+endif()
+
 if(BUILD_TESTS)
     add_executable(repvicore_test
         Test/main.cpp

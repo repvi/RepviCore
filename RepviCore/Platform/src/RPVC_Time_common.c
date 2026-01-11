@@ -1,4 +1,5 @@
 /* Common RPVC Time tick management - architecture independent */
+#include <stddef.h>
 #include "RPVC_Time_common.h"
 #include "RPVC_Time.h"
 

@@ -1,4 +1,5 @@
 /* ARM baremetal OS abstraction layer */
+#include <stddef.h>
 #include "RPVC_OS.h"
 #include "RPVC_Time.h"
 #include "RPVC_System.h"

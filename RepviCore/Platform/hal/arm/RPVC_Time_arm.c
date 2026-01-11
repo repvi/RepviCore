@@ -1,4 +1,5 @@
 /* ARM Cortex-M time/tick management using SysTick */
+#include <stddef.h>
 #include "RPVC_Time.h"
 #include "RPVC_Interrupts.h"
 #include "RPVC_Time_common.h"

@@ -1,4 +1,5 @@
 /* ARM Cortex-M platform abstraction */
+#include <stddef.h>
 #include "RPVC_Platform.h"
 #include "RPVC_Interrupts.h"
 #include <stdint.h>

@@ -1,4 +1,5 @@
 /* ARM Cortex-M system control */
+#include <stddef.h>
 #include "RPVC_System.h"
 #include "RPVC_Interrupts.h"
 #include <stdint.h>

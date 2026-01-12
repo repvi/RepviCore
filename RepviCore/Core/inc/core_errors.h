@@ -19,7 +19,8 @@ typedef enum RPVC_Status_e {
     RPVC_ERR_NO_MEMORY    = -8,
     RPVC_ERR_NO_RESOURCE  = -9,
     RPVC_ERR_INTERNAL     = -10,
-    RPVC_ERR_INTEGRITY    = -11
+    RPVC_ERR_INTEGRITY    = -11,
+    RPVC_ERR_NOT_FOUND    = -12
 } RPVC_Status_t;
 
 RPVC_EXTERN_C_END

@@ -21,7 +21,7 @@
 static uint32_t g_tickFrequency = 0;
 static uint32_t g_cyclesPerTick = 0;
 
-RPVC_Status_t RPVC_TIME_Init(const RPVC_TIMEConfig_t *config)
+RPVC_Status_t RPVC_TIME_Init(const RPVC_TimeConfig_t *config)
 {
     if (RPVC_TIME_IsInitialized()) {
         return RPVC_ERR_INIT;

@@ -42,9 +42,9 @@ RPVC_Status_t RPVC_PLATFORM_GetName(const char **name)
     return RPVC_OK;
 }
 
-RPVC_PLATFORMCapabilities_t RPVC_PLATFORM_GetCapabilities(void)
+RPVC_PlatformCapabilities_t RPVC_PLATFORM_GetCapabilities(void)
 {
-    RPVC_PLATFORMCapabilities_t caps = 0;
+    RPVC_PlatformCapabilities_t caps = 0;
     
 #if defined(__ARM_FEATURE_DSP) && (__ARM_FEATURE_DSP == 1)
     caps |= RPVC_CAP_ARM_DSP;

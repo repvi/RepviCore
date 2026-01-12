@@ -28,9 +28,9 @@ RPVC_Status_t RPVC_PLATFORM_GetName(const char **name)
     return RPVC_OK;
 }
 
-RPVC_PLATFORMCapabilities_t RPVC_PLATFORM_GetCapabilities(void)
+RPVC_PlatformCapabilities_t RPVC_PLATFORM_GetCapabilities(void)
 {
-    RPVC_PLATFORMCapabilities_t caps = 0;
+    RPVC_PlatformCapabilities_t caps = 0;
     
 #if XCHAL_HAVE_FP
     caps |= RPVC_CAP_HW_FPU;

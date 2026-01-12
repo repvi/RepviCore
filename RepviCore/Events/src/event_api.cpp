@@ -1,14 +1,14 @@
 #include "event_api.h"
 #include "EventManager.hpp"
-#include "RPVC_Time.h"
+#include "RPVC_TIME.h"
 
 using namespace repvicore;
 
 static bool g_isInitialized = false;
 
-RPVC_Status_t RPVC_Event_Init(void) 
+RPVC_Status_t RPVC_EVENT_Init(void) 
 {
-    if (!RPVC_Time_IsInitialized()) {
+    if (!RPVC_TIME_IsInitialized()) {
         return RPVC_ERR_NOT_READY;
     }
 
@@ -23,7 +23,7 @@ RPVC_Status_t RPVC_Event_Init(void)
     return status;
 }
 
-RPVC_Status_t RPVC_Event_RegisterHandler(RPVC_EventCallback_t callback) 
+RPVC_Status_t RPVC_EVENT_RegisterHandler(RPVC_EventCallback_t callback) 
 {
     if (!g_isInitialized) {
         return RPVC_ERR_NOT_READY;
@@ -36,7 +36,7 @@ RPVC_Status_t RPVC_Event_RegisterHandler(RPVC_EventCallback_t callback)
     return EventManager::registerHandler(callback);
 }
 
-RPVC_Status_t RPVC_Event_Record(const RPVC_EventPacket_t *eventPacket) 
+RPVC_Status_t RPVC_EVENT_Record(const RPVC_EventPacket_t *eventPacket) 
 {
     if (!g_isInitialized) {
         return RPVC_ERR_NOT_READY;
@@ -49,7 +49,7 @@ RPVC_Status_t RPVC_Event_Record(const RPVC_EventPacket_t *eventPacket)
     return EventManager::recordEvent(eventPacket);
 }
 
-void RPVC_Event_Dispatch(void) 
+void RPVC_EVENT_Dispatch(void) 
 {
     if (!g_isInitialized) {
         return;

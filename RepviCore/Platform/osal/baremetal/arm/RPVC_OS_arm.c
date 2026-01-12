@@ -1,8 +1,8 @@
 /* ARM baremetal OS abstraction layer */
 #include <stddef.h>
 #include "RPVC_OS.h"
-#include "RPVC_Time.h"
-#include "RPVC_System.h"
+#include "RPVC_TIME.h"
+#include "RPVC_SYSTEM.h"
 #include <stdint.h>
 
 /* Baremetal implementation - no RTOS support */

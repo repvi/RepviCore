@@ -1,6 +1,6 @@
 #include "repvicore.h"
-#include "RPVC_Time.h"
-#include "event_api.h"
+#include "Platform/inc/RPVC_TIME.h"
+#include "Events/inc/event_api.h"
 
 RPVC_Status_t RPVC_Init(void)
 {
@@ -11,12 +11,12 @@ RPVC_Status_t RPVC_Init(void)
         .tickHz = 1000       // Example tick frequency in Hz
     };
     
-    status = RPVC_Time_Init(&timeConfig);
+    status = RPVC_TIME_Init(&timeConfig);
     if (status != RPVC_OK) {
         return status;
     }
 
-    status = RPVC_Event_Init();
+    status = RPVC_EVENT_Init();
     if (status != RPVC_OK) {
         return status;
     }

@@ -1,20 +1,20 @@
-/* RISC-V platform abstraction */
-#include "RPVC_Platform.h"
+/* RISC-V PLATFORM abstraction */
+#include "RPVC_PLATFORM.h"
 #include <stdint.h>
 
-static bool s_platformInitialized = false;
+static bool s_PLATFORMInitialized = false;
 
-RPVC_Status_t RPVC_Platform_Init(void)
+RPVC_Status_t RPVC_PLATFORM_Init(void)
 {
-    if (s_platformInitialized) {
+    if (s_PLATFORMInitialized) {
         return RPVC_ERR_INIT;
     }
-    s_platformInitialized = true;
+    s_PLATFORMInitialized = true;
     return RPVC_OK;
-    /* RISC-V platform-specific initialization */
+    /* RISC-V PLATFORM-specific initialization */
 }
 
-RPVC_Status_t RPVC_Platform_GetName(const char **name)
+RPVC_Status_t RPVC_PLATFORM_GetName(const char **name)
 {
     if (name == NULL) {
         return RPVC_ERR_INVALID_ARG;
@@ -29,9 +29,9 @@ RPVC_Status_t RPVC_Platform_GetName(const char **name)
     return RPVC_OK;
 }
 
-RPVC_PlatformCapabilities_t RPVC_Platform_GetCapabilities(void)
+RPVC_PLATFORMCapabilities_t RPVC_PLATFORM_GetCapabilities(void)
 {
-    RPVC_PlatformCapabilities_t caps = 0;
+    RPVC_PLATFORMCapabilities_t caps = 0;
     
 #if defined(__riscv_mul)
     caps |= RPVC_CAP_RISCV_M;  /* M extension (integer multiply/divide) */
@@ -62,13 +62,13 @@ RPVC_PlatformCapabilities_t RPVC_Platform_GetCapabilities(void)
     return caps;
 }
 
-void RPVC_Platform_Yield(void)
+void RPVC_PLATFORM_Yield(void)
 {
     /* Hint that we're waiting - NOP on basic RISC-V */
     __asm__ volatile ("nop");
 }
 
-void RPVC_Platform_Idle(void)
+void RPVC_PLATFORM_Idle(void)
 {
     /* Wait for interrupt */
     __asm__ volatile ("wfi");

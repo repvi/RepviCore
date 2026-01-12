@@ -1,5 +1,5 @@
 /* x86/x64 interrupt control */
-#include "RPVC_Interrupts.h"
+#include "RPVC_INTERRUPTS.h"
 #include <stdint.h>
 
 #if defined(_MSC_VER)
@@ -70,19 +70,19 @@
 /* x86 EFLAGS register IF (Interrupt Enable Flag) bit */
 #define X86_EFLAGS_IF   0x00000200
 
-uint32_t RPVC_Interrupts_Enable(void)
+uint32_t RPVC_INTERRUPTS_Enable(void)
 {
     sti();
     return 0;
 }
 
-uint64_t RPVC_Interrupts_Disable(void)
+uint64_t RPVC_INTERRUPTS_Disable(void)
 {
     cli();
     return 0;
 }
 
-uint32_t RPVC_Interrupts_SaveState(void)
+uint32_t RPVC_INTERRUPTS_SaveState(void)
 {
 #if defined(_MSC_VER)
     uint32_t flags;
@@ -93,25 +93,25 @@ uint32_t RPVC_Interrupts_SaveState(void)
 #endif
 }
 
-void RPVC_Interrupts_RestoreState(uint32_t state)
+void RPVC_INTERRUPTS_RestoreState(uint32_t state)
 {
     push_popfd(state);
 }
 
-uint32_t RPVC_Interrupts_AreEnabled(void)
+uint32_t RPVC_INTERRUPTS_AreEnabled(void)
 {
-    uint32_t flags = RPVC_Interrupts_SaveState();
+    uint32_t flags = RPVC_INTERRUPTS_SaveState();
     return (flags & X86_EFLAGS_IF) ? 1 : 0;
 }
 
-uint32_t RPVC_Interrupts_EnterCritical(void)
+uint32_t RPVC_INTERRUPTS_EnterCritical(void)
 {
-    uint32_t state = RPVC_Interrupts_SaveState();
+    uint32_t state = RPVC_INTERRUPTS_SaveState();
     cli();
     return state;
 }
 
-void RPVC_Interrupts_ExitCritical(uint32_t state)
+void RPVC_INTERRUPTS_ExitCritical(uint32_t state)
 {
     push_popfd(state);
 }

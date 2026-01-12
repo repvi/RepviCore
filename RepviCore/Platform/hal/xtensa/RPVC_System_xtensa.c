@@ -1,6 +1,6 @@
 /* Xtensa system control */
-#include "RPVC_System.h"
-#include "RPVC_Interrupts.h"
+#include "RPVC_SYSTEM.h"
+#include "RPVC_INTERRUPTS.h"
 #include <stdint.h>
 #include <xtensa/config/core.h>
 

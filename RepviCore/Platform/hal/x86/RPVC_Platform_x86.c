@@ -1,28 +1,28 @@
-/* x86/x64 platform abstraction */
-#include "RPVC_Platform.h"
-#include "RPVC_Interrupts.h"
+/* x86/x64 PLATFORM abstraction */
+#include "RPVC_PLATFORM.h"
+#include "RPVC_INTERRUPTS.h"
 #include <stdint.h>
 
 #if defined(_MSC_VER)
     #include <intrin.h>
 #endif
 
-static bool s_platformInitialized = false;
+static bool s_PLATFORMInitialized = false;
 
-RPVC_Status_t RPVC_Platform_Init(void)
+RPVC_Status_t RPVC_PLATFORM_Init(void)
 {
-    if (s_platformInitialized) {
+    if (s_PLATFORMInitialized) {
         return RPVC_ERR_INIT;
     }
 
-    s_platformInitialized = true;
+    s_PLATFORMInitialized = true;
     
-    /* x86 platform-specific initialization */
+    /* x86 PLATFORM-specific initialization */
 
     return RPVC_OK;
 }
 
-RPVC_Status_t RPVC_Platform_GetName(const char **name)
+RPVC_Status_t RPVC_PLATFORM_GetName(const char **name)
 {
     if (name == NULL) {
         return RPVC_ERR_INVALID_ARG;
@@ -35,7 +35,7 @@ RPVC_Status_t RPVC_Platform_GetName(const char **name)
     return RPVC_OK;
 }
 
-RPVC_PlatformCapabilities_t RPVC_Platform_GetCapabilities(void)
+RPVC_PlatformCapabilities_t RPVC_PLATFORM_GetCapabilities(void)
 {
     RPVC_PlatformCapabilities_t caps = 0;
     uint32_t eax, ebx, ecx, edx;
@@ -85,7 +85,7 @@ RPVC_PlatformCapabilities_t RPVC_Platform_GetCapabilities(void)
     return caps;
 }
 
-void RPVC_Platform_Yield(void)
+void RPVC_PLATFORM_Yield(void)
 {
     /* x86 PAUSE instruction - hint for spin-wait loops */
 #if defined(_MSC_VER)
@@ -95,7 +95,7 @@ void RPVC_Platform_Yield(void)
 #endif
 }
 
-void RPVC_Platform_Idle(void)
+void RPVC_PLATFORM_Idle(void)
 {
     /* HLT instruction - halt until interrupt */
 #if defined(_MSC_VER)

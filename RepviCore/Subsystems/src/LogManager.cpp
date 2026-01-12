@@ -50,10 +50,19 @@ namespace repvicore_internal {
         switch (level) {
             case RPVC_LOG_LEVEL_ERROR: {
                 RPVC_EventPacket_t eventPacket;
+                RPVC_Status_t status;
                 eventPacket.severity = RPVC_SEVERITY_ERROR;
                 eventPacket.eventId = RPVC_EVENT_ERROR;
-                RPVC_Status_t status = RPVC_Time_GetMicroseconds(&eventPacket.timestamp);
-                RPVC_EVENT_Record(&eventPacket); // Placeholder for event recording
+                status = RPVC_TIME_GetMicroseconds(&eventPacket.timestamp);
+                if (status != RPVC_OK) {
+                    // do nothing
+                }
+                status = RPVC_EVENT_Record(&eventPacket); // Placeholder for event recording
+                if (status != RPVC_OK) {
+                    // do nothing again, continue
+                }
+                
+                return WriteToBuffer("[ERROR]", message);
             }
                 return WriteToBuffer("[ERROR]", message);
             case RPVC_LOG_LEVEL_WARNING:
@@ -103,7 +112,10 @@ namespace repvicore_internal {
 
     RPVC_Status_t LogManager::GetLastError(char *buffer, size_t bufferLen)
     {
-        return RPVC_Status_t();
+        // TODO: Implement error tracking
+        (void)buffer;
+        (void)bufferLen;
+        return RPVC_ERR_NOT_READY;
     }
 
     RPVC_Status_t LogManager::SetLevel(RPVC_LogLevel_t level)

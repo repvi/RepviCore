@@ -1,6 +1,6 @@
-/* x86/x64 system control */
-#include "RPVC_System.h"
-#include "RPVC_Interrupts.h"
+/* x86/x64 SYSTEM control */
+#include "RPVC_SYSTEM.h"
+#include "RPVC_INTERRUPTS.h"
 #include <stdint.h>
 #include <string.h>
 
@@ -8,7 +8,7 @@
     #include <intrin.h>
 #endif
 
-static uint8_t s_systemInitialized = 0;
+static uint8_t s_SYSTEMInitialized = 0;
 
 /* x86 CPUID instruction wrapper */
 static void cpuid(uint32_t leaf, uint32_t *eax, uint32_t *ebx, uint32_t *ecx, uint32_t *edx)
@@ -29,26 +29,26 @@ static void cpuid(uint32_t leaf, uint32_t *eax, uint32_t *ebx, uint32_t *ecx, ui
 #endif
 }
 
-RPVC_Status_t RPVC_System_Init(void)
+RPVC_Status_t RPVC_SYSTEM_Init(void)
 {
-    if (s_systemInitialized) {
+    if (s_SYSTEMInitialized) {
         return RPVC_OK;
     }
     
-    s_systemInitialized = 1;
+    s_SYSTEMInitialized = 1;
     return RPVC_OK;
 }
 
-RPVC_Status_t RPVC_System_Deinit(void)
+RPVC_Status_t RPVC_SYSTEM_Deinit(void)
 {
-    if (!s_systemInitialized) {
+    if (!s_SYSTEMInitialized) {
         return RPVC_ERR_INIT;
     }
-    s_systemInitialized = 0;
+    s_SYSTEMInitialized = 0;
     return RPVC_OK;
 }
 
-void RPVC_System_Idle(void)
+void RPVC_SYSTEM_Idle(void)
 {
 #if defined(_MSC_VER)
     __halt();
@@ -57,7 +57,7 @@ void RPVC_System_Idle(void)
 #endif
 }
 
-void RPVC_System_Reset(void)
+void RPVC_SYSTEM_Reset(void)
 {
     /* x86 keyboard controller reset (legacy method) */
     /* Or use triple-fault method - not implemented here for safety */
@@ -72,7 +72,7 @@ void RPVC_System_Reset(void)
     }
 }
 
-RPVC_Status_t RPVC_System_GetCPUName(const char **cpuName)
+RPVC_Status_t RPVC_SYSTEM_GetCPUName(const char **cpuName)
 {
     if (cpuName == NULL) {
         return RPVC_ERR_INVALID_ARG;
@@ -104,14 +104,14 @@ RPVC_Status_t RPVC_System_GetCPUName(const char **cpuName)
     return RPVC_OK;
 }
 
-uint32_t RPVC_System_GetCPUID(void)
+uint32_t RPVC_SYSTEM_GetCPUID(void)
 {
     uint32_t eax, ebx, ecx, edx;
     cpuid(1, &eax, &ebx, &ecx, &edx);
     return eax;
 }
 
-RPVC_Status_t RPVC_System_GetCycleCount(uint32_t *cycleCount)
+RPVC_Status_t RPVC_SYSTEM_GetCycleCount(uint32_t *cycleCount)
 {
     if (cycleCount == NULL) {
         return RPVC_ERR_INVALID_ARG;

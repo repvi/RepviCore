@@ -28,7 +28,8 @@ add_library(repvicore STATIC
     RepviCore/Events/src/EventManager.cpp
     
     # Subsystems
-    RepviCore/Subsystems/src/logging_impl.cpp
+    RepviCore/Subsystems/src/logging.cpp
+    RepviCore/Subsystems/src/LogManager.cpp
     RepviCore/Subsystems/src/messaging_impl.cpp
     
     # Platform Common (internal)

@@ -1,7 +1,7 @@
 /* ARM Cortex-M PLATFORM abstraction */
 #include <stddef.h>
 #include "RPVC_PLATFORM.h"
-#include "RPVC_Interrupts.h"
+#include "RPVC_INTERRUPTS.h"
 #include <stdint.h>
 
 static bool g_PLATFORMInitialized = false;

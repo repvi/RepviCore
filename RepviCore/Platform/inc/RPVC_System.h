@@ -6,19 +6,19 @@
 
 RPVC_EXTERN_C_BEGIN
 
-RPVC_Status_t RPVC_System_Init(void);
+RPVC_Status_t RPVC_SYSTEM_Init(void);
 
-RPVC_Status_t RPVC_System_Deinit(void);
+RPVC_Status_t RPVC_SYSTEM_Deinit(void);
 
-void RPVC_System_Idle(void);
+void RPVC_SYSTEM_Idle(void);
 
-void RPVC_System_Reset(void);
+void RPVC_SYSTEM_Reset(void);
 
-RPVC_Status_t RPVC_System_GetCPUName(const char **cpuName);
+RPVC_Status_t RPVC_SYSTEM_GetCPUName(const char **cpuName);
 
-uint32_t RPVC_System_GetCPUID(void);
+uint32_t RPVC_SYSTEM_GetCPUID(void);
 
-RPVC_Status_t RPVC_System_GetCycleCount(uint32_t *cycleCount);
+RPVC_Status_t RPVC_SYSTEM_GetCycleCount(uint32_t *cycleCount);
 
 RPVC_EXTERN_C_END
 

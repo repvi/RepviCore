@@ -1,7 +1,7 @@
-/* RISC-V time/tick management using machine timer */
-#include "RPVC_Time.h"
-#include "RPVC_Interrupts.h"
-#include "RPVC_Time_common.h"
+/* RISC-V TIME/tick management using machine TIMEr */
+#include "RPVC_TIME.h"
+#include "RPVC_INTERRUPTS.h"
+#include "RPVC_TIME_common.h"
 #include <stdint.h>
 
 /* RISC-V CSR access */
@@ -14,9 +14,9 @@
 
 static uint32_t g_tickFrequency = 0;
 
-RPVC_Status_t RPVC_Time_Init(const RPVC_TimeConfig_t *config)
+RPVC_Status_t RPVC_TIME_Init(const RPVC_TimeConfig_t *config)
 {
-    if (RPVC_Time_IsInitialized()) {
+    if (RPVC_TIME_IsInitialized()) {
         return RPVC_ERR_INIT;
     }
 
@@ -26,31 +26,31 @@ RPVC_Status_t RPVC_Time_Init(const RPVC_TimeConfig_t *config)
 
 
     g_tickFrequency = config->tickHz;
-    /* Set initial mtimecmp */
+    /* Set initial mTIMEcmp */
     uint64_t interval = config->systemHz / g_tickFrequency;
     
 #if __riscv_xlen == 32
-    uint64_t now = ((uint64_t)read_csr(mtimeh) << 32) | read_csr(mtime);
+    uint64_t now = ((uint64_t)read_csr(mTIMEh) << 32) | read_csr(mTIME);
     uint64_t next = now + interval;
-    write_csr(mtimecmph, (uint32_t)(next >> 32));
-    write_csr(mtimecmp, (uint32_t)next);
+    write_csr(mTIMEcmph, (uint32_t)(next >> 32));
+    write_csr(mTIMEcmp, (uint32_t)next);
 #else
-    uint64_t next = read_csr(mtime) + interval;
-    write_csr(mtimecmp, next);
+    uint64_t next = read_csr(mTIME) + interval;
+    write_csr(mTIMEcmp, next);
 #endif
     
-    /* Enable machine timer interrupt in mie */
+    /* Enable machine TIMEr interrupt in mie */
     write_csr(mie, read_csr(mie) | (1 << 7));  /* MTIE bit */
     
-    RPVC_Time_SetInitialized(true);
+    RPVC_TIME_SetInitialized(true);
     return RPVC_OK;
 }
 
-/* GetTick is implemented in RPVC_Time_common.c */
+/* GetTick is implemented in RPVC_TIME_common.c */
 
-RPVC_Status_t RPVC_Time_GetMicroseconds(uint64_t *outUs)
+RPVC_Status_t RPVC_TIME_GetMicroseconds(uint64_t *outUs)
 {
-    if (!RPVC_Time_IsInitialized()) {
+    if (!RPVC_TIME_IsInitialized()) {
         return RPVC_ERR_INIT;
     }
 
@@ -60,21 +60,21 @@ RPVC_Status_t RPVC_Time_GetMicroseconds(uint64_t *outUs)
 #if __riscv_xlen == 32
     uint32_t high, low;
     do {
-        high = (uint32_t)read_csr(mtimeh);
-        low = (uint32_t)read_csr(mtime);
-    } while (high != (uint32_t)read_csr(mtimeh));
+        high = (uint32_t)read_csr(mTIMEh);
+        low = (uint32_t)read_csr(mTIME);
+    } while (high != (uint32_t)read_csr(mTIMEh));
     uint64_t cycles = ((uint64_t)high << 32) | low;
 #else
-    uint64_t cycles = read_csr(mtime);
+    uint64_t cycles = read_csr(mTIME);
 #endif
     
     *outUs = cycles * 1000000ULL / g_tickFrequency;
     return RPVC_OK;
 }
 
-RPVC_Status_t RPVC_Time_GetTimeMilliseconds(uint64_t *outMs)
+RPVC_Status_t RPVC_TIME_GetMilliseconds(uint64_t *outMs)
 {
-    if (!RPVC_Time_IsInitialized()) {
+    if (!RPVC_TIME_IsInitialized()) {
         return RPVC_ERR_INIT;
     }
 
@@ -83,7 +83,7 @@ RPVC_Status_t RPVC_Time_GetTimeMilliseconds(uint64_t *outMs)
     }
 
     uint64_t us;
-    RPVC_Status_t status = RPVC_Time_GetMicroseconds(&us);
+    RPVC_Status_t status = RPVC_TIME_GetMicroseconds(&us);
     if (status != RPVC_OK) {
         return status;
     }
@@ -92,23 +92,23 @@ RPVC_Status_t RPVC_Time_GetTimeMilliseconds(uint64_t *outMs)
     return RPVC_OK;
 }
 
-/* TickDiff functions implemented in RPVC_Time_common.c */
+/* TickDiff functions implemented in RPVC_TIME_common.c */
 
-RPVC_Status_t RPVC_Time_DelayUs(uint32_t us)
+RPVC_Status_t RPVC_TIME_DelayUs(uint32_t us)
 {
-    if (!RPVC_Time_IsInitialized()) {
+    if (!RPVC_TIME_IsInitialized()) {
         return RPVC_ERR_INIT;
     }
 
     uint64_t start;
-    RPVC_Status_t status = RPVC_Time_GetMicroseconds(&start);
+    RPVC_Status_t status = RPVC_TIME_GetMicroseconds(&start);
     if (status != RPVC_OK) {
         return status;
     }
     
     while (1) {
         uint64_t current;
-        status = RPVC_Time_GetMicroseconds(&current);
+        status = RPVC_TIME_GetMicroseconds(&current);
         if (status != RPVC_OK) {
             return status;
         }
@@ -120,14 +120,14 @@ RPVC_Status_t RPVC_Time_DelayUs(uint32_t us)
     return RPVC_OK;
 }
 
-RPVC_Status_t RPVC_Time_DelayMs(uint32_t ms)
+RPVC_Status_t RPVC_TIME_DelayMs(uint32_t ms)
 {
-    return RPVC_Time_DelayUs(ms * 1000);
+    return RPVC_TIME_DelayUs(ms * 1000);
 }
 
-RPVC_Status_t RPVC_Time_GetTickFrequency(uint32_t *outFrequency)
+RPVC_Status_t RPVC_TIME_GetTickFrequency(uint32_t *outFrequency)
 {
-    if (!RPVC_Time_IsInitialized()) {
+    if (!RPVC_TIME_IsInitialized()) {
         return RPVC_ERR_INIT;
     }
     if (outFrequency == NULL) {

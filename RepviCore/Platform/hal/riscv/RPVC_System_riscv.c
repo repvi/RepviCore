@@ -1,6 +1,6 @@
-/* RISC-V system control */
-#include "RPVC_System.h"
-#include "RPVC_Interrupts.h"
+/* RISC-V SYSTEM control */
+#include "RPVC_SYSTEM.h"
+#include "RPVC_INTERRUPTS.h"
 #include <stdint.h>
 
 /* RISC-V CSR access macros */
@@ -11,34 +11,34 @@
 #define write_csr(reg, val) ({ \
     __asm__ volatile ("csrw " #reg ", %0" :: "rK"(val)); })
 
-static uint8_t s_systemInitialized = 0;
+static uint8_t s_SystemInitialized = 0;
 
-RPVC_Status_t RPVC_System_Init(void)
+RPVC_Status_t RPVC_SYSTEM_Init(void)
 {
-    if (s_systemInitialized) {
+    if (s_SystemInitialized) {
         return RPVC_OK;
     }
     
-    /* RISC-V system initialization */
-    s_systemInitialized = 1;
+    /* RISC-V SYSTEM initialization */
+    s_SystemInitialized = 1;
     return RPVC_OK;
 }
 
-RPVC_Status_t RPVC_System_Deinit(void)
+RPVC_Status_t RPVC_SYSTEM_Deinit(void)
 {
-    if (!s_systemInitialized) {
+    if (!s_SystemInitialized) {
         return RPVC_ERR_INIT;
     }
-    s_systemInitialized = 0;
+    s_SystemInitialized = 0;
     return RPVC_OK;
 }
 
-void RPVC_System_Idle(void)
+void RPVC_SYSTEM_Idle(void)
 {
     __asm__ volatile ("wfi");
 }
 
-void RPVC_System_Reset(void)
+void RPVC_SYSTEM_Reset(void)
 {
     /* Platform-specific reset mechanism */
     /* Most RISC-V implementations require writing to a vendor-specific register */
@@ -47,7 +47,7 @@ void RPVC_System_Reset(void)
     }
 }
 
-RPVC_Status_t RPVC_System_GetCPUName(const char **cpuName)
+RPVC_Status_t RPVC_SYSTEM_GetCPUName(const char **cpuName)
 {
     if (cpuName == NULL) {
         return RPVC_ERR_INVALID_ARG;
@@ -78,13 +78,13 @@ RPVC_Status_t RPVC_System_GetCPUName(const char **cpuName)
     return RPVC_OK;
 }
 
-uint32_t RPVC_System_GetCPUID(void)
+uint32_t RPVC_SYSTEM_GetCPUID(void)
 {
     /* Read mhartid (hardware thread ID) */
     return (uint32_t)read_csr(mhartid);
 }
 
-RPVC_Status_t RPVC_System_GetCycleCount(uint32_t *cycleCount)
+RPVC_Status_t RPVC_SYSTEM_GetCycleCount(uint32_t *cycleCount)
 {
     if (cycleCount == NULL) {
         return RPVC_ERR_INVALID_ARG;

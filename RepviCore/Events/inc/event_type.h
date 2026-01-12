@@ -38,7 +38,7 @@ typedef enum RPVC_EventSeverity_e {
 } RPVC_EventSeverity_t;
 
 typedef struct RPVC_EventPacket_t {
-    uint32_t timestamp; // System tick or RTC time
+    uint64_t timestamp; // System tick or RTC time
     RPVC_EventSeverity_t severity;
     RPVC_EventId_t eventId;
     uint8_t payload[32];

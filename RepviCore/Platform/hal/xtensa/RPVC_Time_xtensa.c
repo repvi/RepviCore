@@ -1,7 +1,7 @@
-/* Xtensa time/tick management */
-#include "RPVC_Time.h"
-#include "RPVC_Interrupts.h"
-#include "RPVC_Time_common.h"
+/* Xtensa TIME/tick management */
+#include "RPVC_TIME.h"
+#include "RPVC_INTERRUPTS.h"
+#include "RPVC_TIME_common.h"
 #include <stdint.h>
 #include <xtensa/config/core.h>
 
@@ -21,9 +21,9 @@
 static uint32_t g_tickFrequency = 0;
 static uint32_t g_cyclesPerTick = 0;
 
-RPVC_Status_t RPVC_Time_Init(const RPVC_TimeConfig_t *config)
+RPVC_Status_t RPVC_TIME_Init(const RPVC_TIMEConfig_t *config)
 {
-    if (RPVC_Time_IsInitialized()) {
+    if (RPVC_TIME_IsInitialized()) {
         return RPVC_ERR_INIT;
     }
 
@@ -39,21 +39,21 @@ RPVC_Status_t RPVC_Time_Init(const RPVC_TimeConfig_t *config)
     RSR(CCOUNT, ccount);
     WSR(CCOMPARE0, ccount + g_cyclesPerTick);
     
-    /* Enable timer interrupt at level 1 */
+    /* Enable TIMEr interrupt at level 1 */
     uint32_t intenable;
     RSR(INTENABLE, intenable);
     intenable |= (1 << XCHAL_TIMER0_INTERRUPT);
     WSR(INTENABLE, intenable);
     
-    RPVC_Time_SetInitialized(true);
+    RPVC_TIME_SetInitialized(true);
     return RPVC_OK;
 }
 
-/* GetTick is implemented in RPVC_Time_common.c */
+/* GetTick is implemented in RPVC_TIME_common.c */
 
-RPVC_Status_t RPVC_Time_GetMicroseconds(uint64_t *outUs)
+RPVC_Status_t RPVC_TIME_GetMicroseconds(uint64_t *outUs)
 {
-    if (!RPVC_Time_IsInitialized()) {
+    if (!RPVC_TIME_IsInitialized()) {
         return RPVC_ERR_INIT;
     }
 
@@ -64,14 +64,14 @@ RPVC_Status_t RPVC_Time_GetMicroseconds(uint64_t *outUs)
     uint32_t ccount;
     uint64_t ticks;
     
-    uint32_t state = RPVC_Interrupts_EnterCritical();
+    uint32_t state = RPVC_INTERRUPTS_EnterCritical();
     RSR(CCOUNT, ccount);
-    RPVC_Status_t status = RPVC_Time_GetTick64(&ticks);
+    RPVC_Status_t status = RPVC_TIME_GetTick64(&ticks);
     if (status != RPVC_OK) {
-        RPVC_Interrupts_ExitCritical(state);
+        RPVC_INTERRUPTS_ExitCritical(state);
         return status;
     }
-    RPVC_Interrupts_ExitCritical(state);
+    RPVC_INTERRUPTS_ExitCritical(state);
     
     /* Convert ticks to microseconds */
     uint64_t us = ticks * (1000000 / g_tickFrequency);
@@ -85,9 +85,9 @@ RPVC_Status_t RPVC_Time_GetMicroseconds(uint64_t *outUs)
     return RPVC_OK;
 }
 
-RPVC_Status_t RPVC_Time_GetTimeMilliseconds(uint64_t *outMs)
+RPVC_Status_t RPVC_TIME_GetMilliseconds(uint64_t *outMs)
 {
-    if (!RPVC_Time_IsInitialized()) {
+    if (!RPVC_TIME_IsInitialized()) {
         return RPVC_ERR_INIT;
     }
 
@@ -96,7 +96,7 @@ RPVC_Status_t RPVC_Time_GetTimeMilliseconds(uint64_t *outMs)
     }
 
     uint64_t us;
-    RPVC_Status_t status = RPVC_Time_GetMicroseconds(&us);
+    RPVC_Status_t status = RPVC_TIME_GetMicroseconds(&us);
     if (status != RPVC_OK) {
         return status;
     }
@@ -105,11 +105,11 @@ RPVC_Status_t RPVC_Time_GetTimeMilliseconds(uint64_t *outMs)
     return RPVC_OK;
 }
 
-/* TickDiff functions implemented in RPVC_Time_common.c */
+/* TickDiff functions implemented in RPVC_TIME_common.c */
 
-RPVC_Status_t RPVC_Time_DelayUs(uint32_t us)
+RPVC_Status_t RPVC_TIME_DelayUs(uint32_t us)
 {
-    if (!RPVC_Time_IsInitialized()) {
+    if (!RPVC_TIME_IsInitialized()) {
         return RPVC_ERR_INIT;
     }
     uint32_t cycles = (uint32_t)((uint64_t)us * RPVC_XTENSA_CPU_FREQ_HZ / 1000000);
@@ -122,17 +122,17 @@ RPVC_Status_t RPVC_Time_DelayUs(uint32_t us)
     return RPVC_OK;
 }
 
-RPVC_Status_t RPVC_Time_DelayMs(uint32_t ms)
+RPVC_Status_t RPVC_TIME_DelayMs(uint32_t ms)
 {
     for (uint32_t i = 0; i < ms; i++) {
-        RPVC_Time_DelayUs(1000);
+        RPVC_TIME_DelayUs(1000);
     }
     return RPVC_OK;
 }
 
-RPVC_Status_t RPVC_Time_GetTickFrequency(uint32_t *outFrequency)
+RPVC_Status_t RPVC_TIME_GetTickFrequency(uint32_t *outFrequency)
 {
-    if (!RPVC_Time_IsInitialized()) {
+    if (!RPVC_TIME_IsInitialized()) {
         return RPVC_ERR_INIT;
     }
     if (outFrequency == NULL) {

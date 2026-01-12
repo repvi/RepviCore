@@ -1,7 +1,7 @@
 /* ARM Cortex-M system control */
 #include <stddef.h>
-#include "RPVC_System.h"
-#include "RPVC_Interrupts.h"
+#include "RPVC_SYSTEM.h"
+#include "RPVC_INTERRUPTS.h"
 #include <stdint.h>
 
 /* ARM Cortex-M System Control Block (SCB) registers */

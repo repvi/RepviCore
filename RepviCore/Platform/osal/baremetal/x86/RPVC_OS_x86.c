@@ -1,14 +1,15 @@
 /* x86/x64 baremetal OS abstraction layer */
 #include "RPVC_OS.h"
-#include "RPVC_Time.h"
-#include "RPVC_System.h"
+#include "RPVC_TIME.h"
+#include "RPVC_SYSTEM.h"
 #include <stdint.h>
 
 /* Baremetal implementation - no RTOS support */
 
-void RPVC_OS_Init(void)
+RPVC_Status_t RPVC_OS_Init(void)
 {
     /* Nothing to initialize for baremetal */
+    return RPVC_OK;
 }
 
 /* Task API - Not supported in baremetal */
@@ -35,10 +36,10 @@ void RPVC_OS_TaskYield(void)
     /* No scheduler - do nothing */
 }
 
- RPVC_Status_t RPVC_OS_TaskSleep(uint32_t ms)
+RPVC_Status_t RPVC_OS_TaskSleep(uint32_t ms)
 {
     /* Use platform delay instead */
-    return RPVC_Time_DelayMs(ms);
+    return RPVC_TIME_DelayMs(ms);
 }
 
 /* Mutex API - Not supported in baremetal */
@@ -121,7 +122,7 @@ int RPVC_OS_QueueReceive(
 /* Time API - Wrapper around platform time functions */
 RPVC_Status_t RPVC_OS_GetTick(uint32_t *outTick)
 {
-    return RPVC_Time_GetTick(outTick);
+    return RPVC_TIME_GetTick(outTick);
 }
 
 RPVC_Status_t RPVC_OS_GetTimeMicroseconds(uint64_t *outUs)
@@ -129,14 +130,14 @@ RPVC_Status_t RPVC_OS_GetTimeMicroseconds(uint64_t *outUs)
     if (outUs == NULL) {
         return RPVC_ERR_INVALID_ARG;
     }
-    RPVC_Status_t status = RPVC_Time_GetMicroseconds(outUs);
+    RPVC_Status_t status = RPVC_TIME_GetMicroseconds(outUs);
     return status;
 }
 
 /* Optional OS Hooks */
 void RPVC_OS_OnIdle(void)
 {
-    RPVC_System_Idle();
+    RPVC_SYSTEM_Idle();
 }
 
 void RPVC_OS_OnTick(void)

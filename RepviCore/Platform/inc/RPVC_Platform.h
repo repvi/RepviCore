@@ -45,15 +45,15 @@ typedef enum RPVC_PlatformCapabilities_e {
 
 RPVC_EXTERN_C_BEGIN
 
-RPVC_Status_t RPVC_Platform_Init(void);
+RPVC_Status_t RPVC_PLATFORM_Init(void);
 
-RPVC_Status_t RPVC_Platform_GetName(const char **name);
+RPVC_Status_t RPVC_PLATFORM_GetName(const char **name);
 
-RPVC_PlatformCapabilities_t RPVC_Platform_GetCapabilities(void);
+RPVC_PlatformCapabilities_t RPVC_PLATFORM_GetCapabilities(void);
 
-void RPVC_Platform_Yield(void);
+void RPVC_PLATFORM_Yield(void);
 
-void RPVC_Platform_Idle(void);
+void RPVC_PLATFORM_Idle(void);
 
 RPVC_EXTERN_C_END
 

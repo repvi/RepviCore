@@ -8,13 +8,13 @@
 
 RPVC_EXTERN_C_BEGIN
 
-RPVC_Status_t RPVC_Event_Init(void);
+RPVC_Status_t RPVC_EVENT_Init(void);
 
-RPVC_Status_t RPVC_Event_RegisterHandler(RPVC_EventCallback_t callback);
+RPVC_Status_t RPVC_EVENT_RegisterHandler(RPVC_EventCallback_t callback);
 
-RPVC_Status_t RPVC_Event_Record(const RPVC_EventPacket_t *eventPacket);
+RPVC_Status_t RPVC_EVENT_Record(const RPVC_EventPacket_t *eventPacket);
 
-void RPVC_Event_Dispatch(void);
+void RPVC_EVENT_Dispatch(void);
 
 RPVC_EXTERN_C_END
 

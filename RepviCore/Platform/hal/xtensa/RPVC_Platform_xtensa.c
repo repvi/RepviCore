@@ -1,21 +1,21 @@
-/* Xtensa platform abstraction */
-#include "RPVC_Platform.h"
+/* Xtensa PLATFORM abstraction */
+#include "RPVC_PLATFORM.h"
 #include <stdint.h>
 #include <xtensa/config/core.h>
 
-static bool s_platformInitialized = false;
+static bool s_PLATFORMInitialized = false;
 
-RPVC_Status_t RPVC_Platform_Init(void)
+RPVC_Status_t RPVC_PLATFORM_Init(void)
 {
-    if (s_platformInitialized) {
+    if (s_PLATFORMInitialized) {
         return RPVC_ERR_INIT;
     }
-    s_platformInitialized = true;
+    s_PLATFORMInitialized = true;
     return RPVC_OK;
-    /* Xtensa platform-specific initialization */
+    /* Xtensa PLATFORM-specific initialization */
 }
 
-RPVC_Status_t RPVC_Platform_GetName(const char **name)
+RPVC_Status_t RPVC_PLATFORM_GetName(const char **name)
 {
     if (name == NULL) {
         return RPVC_ERR_INVALID_ARG;
@@ -28,9 +28,9 @@ RPVC_Status_t RPVC_Platform_GetName(const char **name)
     return RPVC_OK;
 }
 
-RPVC_PlatformCapabilities_t RPVC_Platform_GetCapabilities(void)
+RPVC_PLATFORMCapabilities_t RPVC_PLATFORM_GetCapabilities(void)
 {
-    RPVC_PlatformCapabilities_t caps = 0;
+    RPVC_PLATFORMCapabilities_t caps = 0;
     
 #if XCHAL_HAVE_FP
     caps |= RPVC_CAP_HW_FPU;
@@ -59,13 +59,13 @@ RPVC_PlatformCapabilities_t RPVC_Platform_GetCapabilities(void)
     return caps;
 }
 
-void RPVC_Platform_Yield(void)
+void RPVC_PLATFORM_Yield(void)
 {
     /* No specific yield instruction on Xtensa */
     __asm__ volatile ("nop");
 }
 
-void RPVC_Platform_Idle(void)
+void RPVC_PLATFORM_Idle(void)
 {
     /* Wait for interrupt - low power mode */
     __asm__ volatile ("waiti 0");

@@ -11,12 +11,12 @@ extern "C" {
 #endif
 
 /* Internal API - called from platform HAL implementations */
-void RPVC_Time_SetInitialized(bool initialized);
-bool RPVC_Time_IsInitialized(void);
+void RPVC_TIME_SetInitialized(bool initialized);
+bool RPVC_TIME_IsInitialized(void);
 
 /* Tick counter access (returns status, uses output parameter) */
-RPVC_Status_t RPVC_Time_GetTick64(uint64_t *outTick);
-RPVC_Status_t RPVC_Time_GetTick(uint32_t *outTick);
+RPVC_Status_t RPVC_TIME_GetTick64(uint64_t *outTick);
+RPVC_Status_t RPVC_TIME_GetTick(uint32_t *outTick);
 
 #ifdef __cplusplus
 }

@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include "macros.h"
 #include "config.h"
+#include "core_errors.h"
 
-#include "core/core_errors.h"
 
 #endif // REPVICORE_CORE_TYPES_HPP

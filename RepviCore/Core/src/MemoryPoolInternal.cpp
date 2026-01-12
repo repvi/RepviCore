@@ -7,10 +7,6 @@ namespace RPVC {
 
     RPVC_Status_t MemoryPoolManager::Init()
     {
-        if (isInitialized_) {
-            return RPVC_ERR_STATE;
-        }
-
         if (memoryPool32_.Init() != RPVC_OK) {
             return RPVC_ERR_INIT;
         }
@@ -42,7 +38,7 @@ namespace RPVC {
     void *MemoryPoolManager::AllocateBlock(uint32_t size)
     {
         if (size <= 32) {
-            void* block = nullptr;
+            void* block;
             if (memoryPool32_.AllocateBlock(&block) == RPVC_OK) {
                 return block;
             } else {
@@ -50,7 +46,7 @@ namespace RPVC {
             }
         }
         else if (size <= 64) {
-            void* block = nullptr;
+            void* block;
             if (memoryPool64_.AllocateBlock(&block) == RPVC_OK) {
                 return block;
             } else {
@@ -58,7 +54,7 @@ namespace RPVC {
             }
         }
         else if (size <= 128) {
-            void* block = nullptr;
+            void* block;
             if (memoryPool128_.AllocateBlock(&block) == RPVC_OK) {
                 return block;
             } else {
@@ -68,5 +64,19 @@ namespace RPVC {
         else {
             return nullptr; // Size too large
         }
+    }
+
+    RPVC_Status_t MemoryPoolManager::FreeBlock(void *ptr)
+    {
+        if (memoryPool32_.FreeBlock(ptr) == RPVC_OK) {
+            return RPVC_OK;
+        }
+        if (memoryPool64_.FreeBlock(ptr) == RPVC_OK) {
+            return RPVC_OK;
+        }
+        if (memoryPool128_.FreeBlock(ptr) == RPVC_OK) {
+            return RPVC_OK;
+        }
+        return RPVC_ERR_INVALID_ARG; // Pointer not found in any pool
     }
 };

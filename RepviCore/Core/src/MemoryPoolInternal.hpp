@@ -18,17 +18,13 @@ namespace RPVC {
             return RPVC_OK;
         }
 
-        RPVC_Status_t Deinit() 
+        RPVC_Status_t Deinit()
         {
             return RPVC_OK;
         }
 
         RPVC_Status_t AllocateBlock(void **outBlock) 
-        {
-            if (outBlock == nullptr) {
-                return RPVC_ERR_INVALID_ARG;
-            }
-            
+        {            
             for (size_t i = 0; i < NumBlocks; ++i) {
                 if (!allocatedFlags_[i]) {
                     allocatedFlags_[i] = true;
@@ -41,10 +37,6 @@ namespace RPVC {
 
         RPVC_Status_t FreeBlock(void* block) 
         {
-            if (block == nullptr) {
-                return RPVC_ERR_INVALID_ARG;
-            }
-
             if (!validMemoryBlock(block)) {
                 return RPVC_ERR_INVALID_ARG;
             }
@@ -107,6 +99,7 @@ namespace RPVC {
         static RPVC_Status_t Deinit();
         static bool IsInitialized();
         static void *AllocateBlock(uint32_t size);
+        static RPVC_Status_t FreeBlock(void* ptr);
 
         private:
 

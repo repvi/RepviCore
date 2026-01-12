@@ -12,7 +12,7 @@ RPVC_Status_t RPVC_MEMORYPOOL_Deinit(void);
 
 bool RPVC_MEMORYPOOL_IsInitialized(void);
 
-RPVC_Status_t RPVC_MEMORYPOOL_Allocate(void** outPtr);
+RPVC_Status_t RPVC_MEMORYPOOL_Allocate(size_t size, void** outPtr);
 
 RPVC_Status_t RPVC_MEMORYPOOL_Free(void* ptr);
 

@@ -1,6 +1,7 @@
 #include "repvicore.h"
 
-int main() {
+int main() 
+{
     RPVC_Init();
     
     return 0;

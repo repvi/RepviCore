@@ -1,6 +1,6 @@
 target_sources(${RPVC_TARGET} PRIVATE
-    RPVC_Interrupts_x86.c
-    RPVC_Platform_x86.c
-    RPVC_System_x86.c
-    RPVC_Time_x86.c
+    RPVC_INTERRUPTS_x86.c
+    RPVC_PLATFORM_x86.c
+    RPVC_SYSTEM_x86.c
+    RPVC_TIME_x86.c
 )

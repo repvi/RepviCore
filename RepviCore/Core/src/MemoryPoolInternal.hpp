@@ -1,0 +1,13 @@
+#ifndef RPVC_MEMORYPOOLINTERNAL_HPP
+#define RPVC_MEMORYPOOLINTERNAL_HPP
+
+#include "compile_time.h"
+#include "core_types.h"
+
+RPVC_EXTERN_C_BEGIN
+
+
+
+RPVC_EXTERN_C_END
+
+#endif // RPVC_MEMORYPOOLINTERNAL_HPP

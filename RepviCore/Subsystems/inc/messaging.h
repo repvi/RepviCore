@@ -1,0 +1,12 @@
+#ifndef REPVICORE_MESSAGING_H
+#define REPVICORE_MESSAGING_H
+
+#include "compile_time.h"
+
+RPVC_EXTERN_C_BEGIN
+
+
+
+RPVC_EXTERN_C_END
+
+#endif // REPVICORE_MESSAGING_H

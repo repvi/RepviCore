@@ -14,6 +14,7 @@ namespace RPVC {
         RPVC_Status_t Init() 
         {
             std::memset(pool_, 0, PoolSize);
+            std::memset(allocatedFlags_, 0, sizeof(allocatedFlags_));
             return RPVC_OK;
         }
 
@@ -22,15 +23,20 @@ namespace RPVC {
             return RPVC_OK;
         }
 
-        void* AllocateBlock() 
+        RPVC_Status_t AllocateBlock(void **outBlock) 
         {
+            if (outBlock == nullptr) {
+                return RPVC_ERR_INVALID_ARG;
+            }
+            
             for (size_t i = 0; i < NumBlocks; ++i) {
                 if (!allocatedFlags_[i]) {
                     allocatedFlags_[i] = true;
-                    return pool_ + (i * BlockSize);
+                    *outBlock = pool_ + (i * BlockSize);
+                    return RPVC_OK;
                 }
             }
-            return nullptr; // No free blocks
+            return RPVC_ERR_NO_MEMORY; // No free blocks
         }
 
         RPVC_Status_t FreeBlock(void* block) 
@@ -38,6 +44,18 @@ namespace RPVC {
             if (block == nullptr) {
                 return RPVC_ERR_INVALID_ARG;
             }
+
+            if (!validMemoryBlock(block)) {
+                return RPVC_ERR_INVALID_ARG;
+            }
+            size_t offset = static_cast<uint8_t*>(block) - pool_;
+
+            size_t index = offset / BlockSize;
+            if (!allocatedFlags_[index]) {
+                return RPVC_ERR_INVALID_ARG; // Block already free
+            }
+            allocatedFlags_[index] = false;
+            return RPVC_OK;
         }
 
         size_t GetBlockSize() const 
@@ -72,6 +90,12 @@ namespace RPVC {
         }
 
         private:
+
+        bool validMemoryBlock(void* block)
+        {
+            return (pool_ <= block) && (static_cast<uint8_t*>(block) < pool_ + PoolSize) &&
+                   (((static_cast<uint8_t*>(block) - pool_) % BlockSize) == 0);
+        }
 
         uint8_t pool_[PoolSize];
         bool allocatedFlags_[NumBlocks];

@@ -22,7 +22,7 @@
 
 static bool s_systemInitialized = false;
 
-RPVC_Status_t RPVC_System_Init(void)
+RPVC_Status_t RPVC_SYSTEM_Init(void)
 {
     if (s_systemInitialized) {
         return RPVC_ERR_INIT;
@@ -39,7 +39,7 @@ RPVC_Status_t RPVC_System_Init(void)
     return RPVC_OK;
 }
 
-RPVC_Status_t RPVC_System_Deinit(void)
+RPVC_Status_t RPVC_SYSTEM_Deinit(void)
 {
     if (!s_systemInitialized) {
         return RPVC_ERR_INIT;
@@ -48,12 +48,12 @@ RPVC_Status_t RPVC_System_Deinit(void)
     return RPVC_OK;
 }
 
-void RPVC_System_Idle(void)
+void RPVC_SYSTEM_Idle(void)
 {
     __asm__ volatile ("wfi");
 }
 
-void RPVC_System_Reset(void)
+void RPVC_SYSTEM_Reset(void)
 {
     /* AIRCR register: write key and set SYSRESETREQ */
     uint32_t aircr = SCB_AIRCR & 0x0000FFFF;
@@ -65,7 +65,7 @@ void RPVC_System_Reset(void)
     }
 }
 
-RPVC_Status_t RPVC_System_GetCPUName(const char **cpuName)
+RPVC_Status_t RPVC_SYSTEM_GetCPUName(const char **cpuName)
 {
     if (cpuName == NULL) {
         return RPVC_ERR_INVALID_ARG;
@@ -89,12 +89,12 @@ RPVC_Status_t RPVC_System_GetCPUName(const char **cpuName)
     }
 }
 
-uint32_t RPVC_System_GetCPUID(void)
+uint32_t RPVC_SYSTEM_GetCPUID(void)
 {
     return SCB_CPUID;
 }
 
-RPVC_Status_t RPVC_System_GetCycleCount(uint32_t *cycleCount)
+RPVC_Status_t RPVC_SYSTEM_GetCycleCount(uint32_t *cycleCount)
 {
     #if defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7EM__) || defined(__ARM_ARCH_8M_MAIN__)
     if (!s_systemInitialized) {

@@ -1,23 +1,23 @@
-/* ARM Cortex-M platform abstraction */
+/* ARM Cortex-M PLATFORM abstraction */
 #include <stddef.h>
-#include "RPVC_Platform.h"
+#include "RPVC_PLATFORM.h"
 #include "RPVC_Interrupts.h"
 #include <stdint.h>
 
-static bool g_platformInitialized = false;
+static bool g_PLATFORMInitialized = false;
 
-RPVC_Status_t RPVC_Platform_Init(void)
+RPVC_Status_t RPVC_PLATFORM_Init(void)
 {
-    if (g_platformInitialized) {
+    if (g_PLATFORMInitialized) {
         return RPVC_ERR_INIT;
     }
-    /* Platform-specific initialization */
+    /* PLATFORM-specific initialization */
     /* Configure system clocks, peripherals, etc. */
-    g_platformInitialized = true;
+    g_PLATFORMInitialized = true;
     return RPVC_OK;
 }
 
-RPVC_Status_t RPVC_Platform_GetName(const char **name)
+RPVC_Status_t RPVC_PLATFORM_GetName(const char **name)
 {
     if (name == NULL) {
         return RPVC_ERR_INVALID_ARG;
@@ -42,9 +42,9 @@ RPVC_Status_t RPVC_Platform_GetName(const char **name)
     return RPVC_OK;
 }
 
-RPVC_PlatformCapabilities_t RPVC_Platform_GetCapabilities(void)
+RPVC_PLATFORMCapabilities_t RPVC_PLATFORM_GetCapabilities(void)
 {
-    RPVC_PlatformCapabilities_t caps = 0;
+    RPVC_PLATFORMCapabilities_t caps = 0;
     
 #if defined(__ARM_FEATURE_DSP) && (__ARM_FEATURE_DSP == 1)
     caps |= RPVC_CAP_ARM_DSP;
@@ -69,13 +69,13 @@ RPVC_PlatformCapabilities_t RPVC_Platform_GetCapabilities(void)
     return caps;
 }
 
-void RPVC_Platform_Yield(void)
+void RPVC_PLATFORM_Yield(void)
 {
     /* Hint to the processor that we're in a spin-wait loop */
     __asm__ volatile ("yield");
 }
 
-void RPVC_Platform_Idle(void)
+void RPVC_PLATFORM_Idle(void)
 {
     /* Wait for interrupt - low power mode */
     __asm__ volatile ("wfi");

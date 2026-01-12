@@ -1,5 +1,5 @@
 /**
- * @file logging_impl.cpp
+ * @file logging.cpp
  * @brief C API implementation for logging subsystem
  * @note NASA-grade defensive programming: All pointers validated, all states checked
  */

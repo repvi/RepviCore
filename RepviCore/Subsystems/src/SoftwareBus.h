@@ -22,7 +22,7 @@ RPVC_Status_t RPVC_SB_Deinit(void);
 RPVC_Status_t RPVC_SB_Subscribe(RPVC_SbSubscriberId_t subscriberId, RPVC_SbMsgId_t messageId);
 RPVC_Status_t RPVC_SB_Unsubscribe(RPVC_SbSubscriberId_t subscriberId, RPVC_SbMsgId_t messageId);
 
-RPVC_Status_t RPVC_SB_Publish(RPVC_SbMsgHandle_t messageHandle, RPVC_SbSubscriberId_t subscriberId);
+RPVC_Status_t RPVC_SB_Publish(RPVC_SbMsgHandle_t messageHandle);
 RPVC_Status_t RPVC_SB_Receive(RPVC_SbSubscriberId_t subscriberId, uint8_t *outBuffer, size_t bufferSize);
 RPVC_Status_t RPVC_SB_Flush(RPVC_SbSubscriberId_t subscriberId);
 

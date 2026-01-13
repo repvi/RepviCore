@@ -14,6 +14,7 @@ typedef struct RPVC_SbMsg_t {
     uint8_t payload[MAX_PAYLOAD_SIZE];
     RPVC_SbMsgId_t messageId;
     uint16_t len;
+    uint8_t refCount;
 } RPVC_SbMsg_t;
 
 typedef struct {
@@ -21,7 +22,6 @@ typedef struct {
     uint32_t head;
     uint32_t tail;
     uint32_t count;
-    uint8_t refCount;
 } RPVC_SbQueue_t;
 
 typedef struct {
@@ -45,17 +45,19 @@ static RPVC_SbState_t g_sbState = {};
 static void addMessageToPipe(RPVC_SbPip_t *pipe, RPVC_SbMsgHandle_t messageHandle) 
 {
     size_t tailIndex = pipe->queue.tail;
-    pipe->queue.buffer[tailIndex] = messageHandle;
     pipe->queue.tail = (tailIndex + 1) % MAX_QUEUE_DEPTH;
     pipe->queue.count++;
+    messageHandle->refCount++;
+    pipe->queue.buffer[tailIndex] = messageHandle;
 }
 
 static void grabAndPopMessageFromPipe(RPVC_SbPip_t *pipe, RPVC_SbMsgHandle_t *outMessageHandle) 
 {
     size_t headIndex = pipe->queue.head;
-    *outMessageHandle = pipe->queue.buffer[headIndex];
     pipe->queue.head = (headIndex + 1) % MAX_QUEUE_DEPTH;
     pipe->queue.count--;
+    (*outMessageHandle)->refCount--;
+    *outMessageHandle = pipe->queue.buffer[headIndex];
 }
 
 static void initPipes() 
@@ -65,7 +67,6 @@ static void initPipes()
         g_sbState.pipes[i].queue.head = 0;
         g_sbState.pipes[i].queue.tail = 0;
         g_sbState.pipes[i].queue.count = 0;
-        g_sbState.pipes[i].queue.refCount = 0;
     }
 }
 
@@ -152,13 +153,11 @@ RPVC_Status_t RPVC_SB_Subscribe(RPVC_SbSubscriberId_t subscriberId, RPVC_SbMsgId
         entry->count++;
 
         g_sbState.pipes[subscriberId].isInitialized = true;
-        g_sbState.pipes[subscriberId].queue.refCount++;
         return RPVC_OK;
     }
     else {
         return RPVC_ERR_OUT_OF_RANGE;
     }
-
 }
 
 RPVC_Status_t RPVC_SB_Unsubscribe(RPVC_SbSubscriberId_t subscriberId, RPVC_SbMsgId_t messageId)
@@ -175,13 +174,9 @@ RPVC_Status_t RPVC_SB_Unsubscribe(RPVC_SbSubscriberId_t subscriberId, RPVC_SbMsg
     if (entry->count > 0) {
         for (size_t i = 0; i < MAX_SUBSCRIBERS; i++) {
             if (entry->subscriberIds[i] == subscriberId) {
+                RPVC_SbPip_t *pipe = &g_sbState.pipes[subscriberId];
                 entry->subscriberIds[i] = NOT_VALID_SUBSCRIBER_ID;
                 entry->count--;
-                if (g_sbState.pipes[subscriberId].queue.refCount == 0) {
-                    return RPVC_ERR_INTERNAL;
-                }
-                g_sbState.pipes[subscriberId].queue.refCount--;
-                g_sbState.pipes[subscriberId].isInitialized = g_sbState.pipes[subscriberId].queue.refCount > 0;
                 return RPVC_OK;
             }
         }
@@ -189,23 +184,39 @@ RPVC_Status_t RPVC_SB_Unsubscribe(RPVC_SbSubscriberId_t subscriberId, RPVC_SbMsg
     return RPVC_ERR_NOT_FOUND;
 }
 
-RPVC_Status_t RPVC_SB_Publish(RPVC_SbMsgHandle_t messageHandle, RPVC_SbSubscriberId_t subscriberId)
+RPVC_Status_t RPVC_SB_Publish(RPVC_SbMsgHandle_t messageHandle)
 {
     if (!g_sbState.isInitialized) {
         return RPVC_ERR_NOT_READY;
     }
 
-    if (!messageHandle || !IsValidSubscriber(subscriberId)) {
+    RPVC_SbMsgId_t msgId = messageHandle->messageId;
+    if (!messageHandle || !IsValidMessageId(msgId)) {
         return RPVC_ERR_INVALID_ARG;
     }
-    
-    RPVC_SbPip_t *pipe = &g_sbState.pipes[subscriberId];
-    if (!pipe->isInitialized || pipe->queue.count >= MAX_QUEUE_DEPTH) {
-        return RPVC_ERR_OUT_OF_RANGE;
+
+    bool publishedToAtLeastOne = false;
+
+    RPVC_SbRouteEntry_t *entry = &g_sbState.routes[msgId];
+    for (size_t j = 0; j < MAX_SUBSCRIBERS; j++) {
+        RPVC_SbSubscriberId_t subscriberId = entry->subscriberIds[j];
+
+        if (subscriberId != NOT_VALID_SUBSCRIBER_ID) {
+            RPVC_SbPip_t *pipe = &g_sbState.pipes[subscriberId];
+
+            if (pipe->isInitialized && pipe->queue.count < MAX_QUEUE_DEPTH) {
+                addMessageToPipe(pipe, messageHandle);
+                publishedToAtLeastOne = true;
+            }
+        }
     }
 
-    addMessageToPipe(pipe, messageHandle);
-    return RPVC_OK;
+    if (publishedToAtLeastOne) {
+        return RPVC_OK;
+    }
+    else {
+        return RPVC_ERR_OUT_OF_RANGE;
+    }
 }
 
 RPVC_Status_t RPVC_SB_Receive(RPVC_SbSubscriberId_t subscriberId, uint8_t *outBuffer, size_t bufferSize)
@@ -243,7 +254,6 @@ RPVC_Status_t RPVC_SB_Flush(RPVC_SbSubscriberId_t subscriberId)
     pipe->queue.head = 0;
     pipe->queue.tail = 0;
     pipe->queue.count = 0;
-    pipe->queue.refCount = 0;
     pipe->isInitialized = false;
     
     return RPVC_OK;
@@ -269,6 +279,7 @@ RPVC_Status_t RPVC_SB_CreateMessage(RPVC_SbMsgId_t messageId, const uint8_t *mes
     newmessage->messageId = messageId;
     memcpy(newmessage->payload, messageData, trueSize);
     newmessage->len = trueSize;
+    newmessage->refCount = 0;
     *outMessageHandle = newmessage;
     return RPVC_OK;
 }
@@ -283,5 +294,10 @@ RPVC_Status_t RPVC_SB_ReleaseMessage(RPVC_SbMsgHandle_t messageHandle)
         return RPVC_ERR_INVALID_ARG;
     }
 
-    return RPVC_MEMORYPOOL_Free((void*)messageHandle);
+    if (messageHandle->refCount > 0) { // some pipes are still using it
+        return RPVC_ERR_STATE;
+    }
+    else {
+        return RPVC_MEMORYPOOL_Free((void*)messageHandle);
+    }
 }

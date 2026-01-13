@@ -1,8 +1,8 @@
 #ifndef REPVICORE_LOGGING_H
 #define REPVICORE_LOGGING_H
 
-#include "core/core_types.h"
-#include "core/core_errors.h"
+#include "core_types.h"
+#include "core_errors.h"
 #include "compile_time.h"
 #include "logging_def.h"
 #include <stddef.h>

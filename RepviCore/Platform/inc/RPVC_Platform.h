@@ -1,7 +1,7 @@
 #ifndef RPVC_PLATFORM_H
 #define RPVC_PLATFORM_H
 
-#include "core/core_types.h"
+#include "core_types.h"
 #include "compile_time.h"
 
 typedef enum RPVC_PlatformCapabilities_e {

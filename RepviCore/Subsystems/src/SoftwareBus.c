@@ -40,25 +40,7 @@ typedef struct {
     bool isInitialized;
 } RPVC_SbState_t;
 
-static RPVC_SbState_t g_sbState = {};
-
-static void addMessageToPipe(RPVC_SbPip_t *pipe, RPVC_SbMsgHandle_t messageHandle) 
-{
-    size_t tailIndex = pipe->queue.tail;
-    pipe->queue.tail = (tailIndex + 1) % MAX_QUEUE_DEPTH;
-    pipe->queue.count++;
-    messageHandle->refCount++;
-    pipe->queue.buffer[tailIndex] = messageHandle;
-}
-
-static void grabAndPopMessageFromPipe(RPVC_SbPip_t *pipe, RPVC_SbMsgHandle_t *outMessageHandle) 
-{
-    size_t headIndex = pipe->queue.head;
-    pipe->queue.head = (headIndex + 1) % MAX_QUEUE_DEPTH;
-    pipe->queue.count--;
-    (*outMessageHandle)->refCount--;
-    *outMessageHandle = pipe->queue.buffer[headIndex];
-}
+static RPVC_SbState_t g_sbState = {0};
 
 static void initPipes() 
 {
@@ -174,7 +156,7 @@ RPVC_Status_t RPVC_SB_Unsubscribe(RPVC_SbSubscriberId_t subscriberId, RPVC_SbMsg
     if (entry->count > 0) {
         for (size_t i = 0; i < MAX_SUBSCRIBERS; i++) {
             if (entry->subscriberIds[i] == subscriberId) {
-                RPVC_SbPip_t *pipe = &g_sbState.pipes[subscriberId];
+                //RPVC_SbPip_t *pipe = &g_sbState.pipes[subscriberId];
                 entry->subscriberIds[i] = NOT_VALID_SUBSCRIBER_ID;
                 entry->count--;
                 return RPVC_OK;
@@ -184,14 +166,27 @@ RPVC_Status_t RPVC_SB_Unsubscribe(RPVC_SbSubscriberId_t subscriberId, RPVC_SbMsg
     return RPVC_ERR_NOT_FOUND;
 }
 
+static void addMessageToPipe(RPVC_SbPip_t *pipe, RPVC_SbMsgHandle_t messageHandle) 
+{
+    size_t tailIndex = pipe->queue.tail;
+    pipe->queue.tail = (tailIndex + 1) % MAX_QUEUE_DEPTH;
+    pipe->queue.count++;
+    messageHandle->refCount++;
+    pipe->queue.buffer[tailIndex] = messageHandle;
+}
+
 RPVC_Status_t RPVC_SB_Publish(RPVC_SbMsgHandle_t messageHandle)
 {
     if (!g_sbState.isInitialized) {
         return RPVC_ERR_NOT_READY;
     }
 
+    if (!messageHandle) {
+        return RPVC_ERR_INVALID_ARG;
+    }
+    
     RPVC_SbMsgId_t msgId = messageHandle->messageId;
-    if (!messageHandle || !IsValidMessageId(msgId)) {
+    if (IsValidMessageId(msgId) == false) {
         return RPVC_ERR_INVALID_ARG;
     }
 
@@ -217,6 +212,17 @@ RPVC_Status_t RPVC_SB_Publish(RPVC_SbMsgHandle_t messageHandle)
     else {
         return RPVC_ERR_OUT_OF_RANGE;
     }
+}
+
+static void grabAndPopMessageFromPipe(RPVC_SbPip_t *pipe, RPVC_SbMsgHandle_t *outMessageHandle) 
+{
+    size_t headIndex = pipe->queue.head;
+    pipe->queue.head = (headIndex + 1) % MAX_QUEUE_DEPTH;
+    pipe->queue.count--;
+
+    RPVC_SbMsgHandle_t message = pipe->queue.buffer[headIndex];
+    message->refCount--;
+    *outMessageHandle = message;
 }
 
 RPVC_Status_t RPVC_SB_Receive(RPVC_SbSubscriberId_t subscriberId, uint8_t *outBuffer, size_t bufferSize)

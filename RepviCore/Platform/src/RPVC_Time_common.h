@@ -2,7 +2,7 @@
 #ifndef RPVC_TIME_COMMON_H
 #define RPVC_TIME_COMMON_H
 
-#include "core/core_types.h"
+#include "core_types.h"
 #include <stdint.h>
 #include <stdbool.h>
 

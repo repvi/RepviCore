@@ -1,6 +1,7 @@
 #include "repvicore.h"
-#include "Platform/inc/RPVC_TIME.h"
-#include "Events/inc/event_api.h"
+#include "RPVC_TIME.h"
+#include "event_api.h"
+#include "SoftwareBus.h"
 
 RPVC_Status_t RPVC_Init(void)
 {

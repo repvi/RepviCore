@@ -15,6 +15,13 @@ typedef struct RPVC_SbMsg_t *RPVC_SbMsgHandle_t;
 
 RPVC_EXTERN_C_BEGIN
 
+/**
+ * Initialize the Software Bus.
+ *
+ * @param config Non-NULL pointer to configuration (callbacks).
+ * @return RPVC_OK on success; RPVC_ERR_INVALID_ARG, RPVC_ERR_NOT_READY,
+ *         or RPVC_ERR_STATE on failure.
+ */
 RPVC_Status_t RPVC_SB_Init(const RPVC_SoftwareBusConfig_t* config);
 
 RPVC_Status_t RPVC_SB_Deinit(void);
@@ -27,6 +34,7 @@ RPVC_Status_t RPVC_SB_Receive(RPVC_SbSubscriberId_t subscriberId, uint8_t *outBu
 RPVC_Status_t RPVC_SB_Flush(RPVC_SbSubscriberId_t subscriberId);
 
 RPVC_Status_t RPVC_SB_CreateMessage(RPVC_SbMsgId_t messageId, const uint8_t *messageData, size_t messageSize, RPVC_SbMsgHandle_t *outMessageHandle);
+
 RPVC_Status_t RPVC_SB_ReleaseMessage(RPVC_SbMsgHandle_t messageHandle);
 
 RPVC_EXTERN_C_END

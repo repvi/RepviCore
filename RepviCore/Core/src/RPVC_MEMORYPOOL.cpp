@@ -13,9 +13,7 @@ RPVC_Status_t RPVC_MEMORYPOOL_Init(void)
         return RPVC_ERR_STATE;
     }
 
-    MemoryPoolManager::Init();
-    
-    return RPVC_OK;
+    return MemoryPoolManager::Init();
 }
 
 RPVC_Status_t RPVC_MEMORYPOOL_Deinit(void)
@@ -23,8 +21,8 @@ RPVC_Status_t RPVC_MEMORYPOOL_Deinit(void)
     if (!MemoryPoolManager::IsInitialized()) {
         return RPVC_ERR_NOT_READY;
     }
-    MemoryPoolManager::Deinit();
-    return RPVC_OK;
+    
+    return MemoryPoolManager::Deinit();
 }
 
 bool RPVC_MEMORYPOOL_IsInitialized(void)

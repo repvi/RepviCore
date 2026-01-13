@@ -17,7 +17,9 @@ add_library(repvicore STATIC
     RepviCore/repvicore.c
     
     # Core
-    RepviCore/Core/core_api.cpp
+    RepviCore/Core/src/core_api.cpp
+    RepviCore/Core/src/MemoryPoolInternal.cpp
+    RepviCore/Core/src/RPVC_MEMORYPOOL.cpp
         
     # Validation
     RepviCore/Core/Validation/src/RPVC_Validator_api.cpp
@@ -30,8 +32,9 @@ add_library(repvicore STATIC
     # Subsystems
     RepviCore/Subsystems/src/logging.cpp
     RepviCore/Subsystems/src/LogManager.cpp
-    RepviCore/Subsystems/src/messaging_impl.cpp
-    
+    RepviCore/Subsystems/src/messaging.cpp
+    RepviCore/Subsystems/src/SoftwareBus.c
+
     # Platform Common (internal)
     RepviCore/Platform/src/RPVC_Time_common.c
 )
@@ -41,7 +44,7 @@ target_include_directories(repvicore
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/RepviCore
         ${CMAKE_CURRENT_SOURCE_DIR}/RepviCore/CompileTime
-        ${CMAKE_CURRENT_SOURCE_DIR}/RepviCore/Core
+        ${CMAKE_CURRENT_SOURCE_DIR}/RepviCore/Core/inc
         ${CMAKE_CURRENT_SOURCE_DIR}/RepviCore/Core/TimeSystem
         ${CMAKE_CURRENT_SOURCE_DIR}/RepviCore/Core/Validation/inc
         ${CMAKE_CURRENT_SOURCE_DIR}/RepviCore/Events/inc

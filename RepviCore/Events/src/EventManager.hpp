@@ -1,8 +1,8 @@
 #ifndef REPVICORE_EVENT_MANAGER_HPP
 #define REPVICORE_EVENT_MANAGER_HPP
 
-#include "core/core_types.h"
-#include "core/core_errors.h"
+#include "core_types.h"
+#include "core_errors.h"
 #include "compile_time.h"
 #include "event_type.h"
 

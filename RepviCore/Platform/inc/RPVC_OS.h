@@ -2,7 +2,7 @@
 #define RPVC_OS_H
 
 #include <stdint.h>
-#include "core/core_types.h"
+#include "core_types.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -1,7 +1,7 @@
 #ifndef RPVC_TIME_H
 #define RPVC_TIME_H
 
-#include "core/core_types.h"
+#include "core_types.h"
 #include "compile_time.h"
 #include <stdbool.h>
 #include <stdint.h>

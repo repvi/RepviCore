@@ -3,8 +3,8 @@
 
 #include <cstddef>
 #include <cstdint>
-#include "core/core_types.h"
-#include "core/core_errors.h"
+#include "core_types.h"
+#include "core_errors.h"
 #include "logging.h"
 
 namespace repvicore_internal {

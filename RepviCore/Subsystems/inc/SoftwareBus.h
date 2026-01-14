@@ -4,6 +4,12 @@
 #include "compile_time.h"
 #include "core_types.h"
 
+#define RPVC_SB_MAX_PAYLOAD_SIZE 100
+#define RPVC_SB_MAX_QUEUE_DEPTH 5
+#define RPVC_SB_MAX_PIPES 10
+#define RPVC_SB_MAX_SUBSCRIBERS 10
+#define RPVC_SB_MAX_MESSAGE_ID 20
+
 typedef uint16_t RPVC_SbSubscriberId_t; // pipe index
 typedef uint16_t RPVC_SbMsgId_t; // routing key
 

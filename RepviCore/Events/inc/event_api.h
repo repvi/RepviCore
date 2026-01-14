@@ -12,6 +12,8 @@ RPVC_Status_t RPVC_EVENT_Init(void);
 
 RPVC_Status_t RPVC_EVENT_RegisterHandler(RPVC_EventCallback_t callback);
 
+RPVC_Status_t RPVC_EVENT_UnregisterHandler(RPVC_EventCallback_t callback);
+
 RPVC_Status_t RPVC_EVENT_Record(const RPVC_EventPacket_t *eventPacket);
 
 void RPVC_EVENT_Dispatch(void);

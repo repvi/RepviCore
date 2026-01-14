@@ -2,23 +2,17 @@
 #include "RPVC_MEMORYPOOL.h"
 #include <string.h>
 
-#define MAX_PAYLOAD_SIZE 100
-#define MAX_QUEUE_DEPTH 5
-#define MAX_PIPES 10
-#define MAX_SUBSCRIBERS 10
-#define MAX_MESSAGE_ID 20
-
 #define NOT_VALID_SUBSCRIBER_ID (RPVC_SbSubscriberId_t)(-1)
 
 typedef struct RPVC_SbMsg_t {
-    uint8_t payload[MAX_PAYLOAD_SIZE];
+    uint8_t payload[RPVC_SB_MAX_PAYLOAD_SIZE];
     RPVC_SbMsgId_t messageId;
     uint16_t len;
     uint8_t refCount;
 } RPVC_SbMsg_t;
 
 typedef struct {
-    RPVC_SbMsgHandle_t buffer[MAX_QUEUE_DEPTH];
+    RPVC_SbMsgHandle_t buffer[RPVC_SB_MAX_QUEUE_DEPTH];
     uint32_t head;
     uint32_t tail;
     uint32_t count;
@@ -30,13 +24,13 @@ typedef struct {
 } RPVC_SbPip_t;
 
 typedef struct {
-    RPVC_SbSubscriberId_t subscriberIds[MAX_SUBSCRIBERS]; // store the index of pipes here
+    RPVC_SbSubscriberId_t subscriberIds[RPVC_SB_MAX_SUBSCRIBERS]; // store the index of pipes here
     uint8_t count;
 }RPVC_SbRouteEntry_t;
 
 typedef struct {
-    RPVC_SbPip_t pipes[MAX_PIPES];
-    RPVC_SbRouteEntry_t routes[MAX_MESSAGE_ID];
+    RPVC_SbPip_t pipes[RPVC_SB_MAX_PIPES];
+    RPVC_SbRouteEntry_t routes[RPVC_SB_MAX_MESSAGE_ID];
     bool isInitialized;
 } RPVC_SbState_t;
 
@@ -44,7 +38,7 @@ static RPVC_SbState_t g_sbState = {0};
 
 static void initPipes() 
 {
-    for (size_t i = 0; i < MAX_PIPES; i++) {
+    for (size_t i = 0; i < RPVC_SB_MAX_PIPES; i++) {
         g_sbState.pipes[i].isInitialized = false;
         g_sbState.pipes[i].queue.head = 0;
         g_sbState.pipes[i].queue.tail = 0;
@@ -54,9 +48,9 @@ static void initPipes()
 
 static void initRoutes() 
 {
-    for (size_t i = 0; i < MAX_MESSAGE_ID; i++) {
+    for (size_t i = 0; i < RPVC_SB_MAX_MESSAGE_ID; i++) {
         g_sbState.routes[i].count = 0;
-        for (size_t j = 0; j < MAX_SUBSCRIBERS; j++) {
+        for (size_t j = 0; j < RPVC_SB_MAX_SUBSCRIBERS; j++) {
             g_sbState.routes[i].subscriberIds[j] = NOT_VALID_SUBSCRIBER_ID;
         }
     }
@@ -96,12 +90,12 @@ RPVC_Status_t RPVC_SB_Deinit(void)
 
 static bool IsValidSubscriber(RPVC_SbSubscriberId_t subscriberId)
 {
-    return subscriberId < MAX_PIPES;
+    return subscriberId < RPVC_SB_MAX_PIPES;
 }
 
 static bool IsValidMessageId(RPVC_SbMsgId_t messageId)
 {
-    return messageId < MAX_MESSAGE_ID;
+    return messageId < RPVC_SB_MAX_MESSAGE_ID;
 }
 
 RPVC_Status_t RPVC_SB_Subscribe(RPVC_SbSubscriberId_t subscriberId, RPVC_SbMsgId_t messageId)
@@ -115,9 +109,9 @@ RPVC_Status_t RPVC_SB_Subscribe(RPVC_SbSubscriberId_t subscriberId, RPVC_SbMsgId
     }
 
     RPVC_SbRouteEntry_t *entry = &g_sbState.routes[messageId];
-    if (entry->count < MAX_SUBSCRIBERS) {
+    if (entry->count < RPVC_SB_MAX_SUBSCRIBERS) {
         size_t emptyIndex = (size_t)(-1);
-        for (size_t i = 0; i < MAX_SUBSCRIBERS; i++) {
+        for (size_t i = 0; i < RPVC_SB_MAX_SUBSCRIBERS; i++) {
             if (entry->subscriberIds[i] == subscriberId) {
                 return RPVC_OK; // Already subscribed
             }
@@ -154,7 +148,7 @@ RPVC_Status_t RPVC_SB_Unsubscribe(RPVC_SbSubscriberId_t subscriberId, RPVC_SbMsg
 
     RPVC_SbRouteEntry_t *entry = &g_sbState.routes[messageId];
     if (entry->count > 0) {
-        for (size_t i = 0; i < MAX_SUBSCRIBERS; i++) {
+        for (size_t i = 0; i < RPVC_SB_MAX_SUBSCRIBERS; i++) {
             if (entry->subscriberIds[i] == subscriberId) {
                 //RPVC_SbPip_t *pipe = &g_sbState.pipes[subscriberId];
                 entry->subscriberIds[i] = NOT_VALID_SUBSCRIBER_ID;
@@ -169,7 +163,7 @@ RPVC_Status_t RPVC_SB_Unsubscribe(RPVC_SbSubscriberId_t subscriberId, RPVC_SbMsg
 static void addMessageToPipe(RPVC_SbPip_t *pipe, RPVC_SbMsgHandle_t messageHandle) 
 {
     size_t tailIndex = pipe->queue.tail;
-    pipe->queue.tail = (tailIndex + 1) % MAX_QUEUE_DEPTH;
+    pipe->queue.tail = (tailIndex + 1) % RPVC_SB_MAX_QUEUE_DEPTH;
     pipe->queue.count++;
     messageHandle->refCount++;
     pipe->queue.buffer[tailIndex] = messageHandle;
@@ -193,13 +187,13 @@ RPVC_Status_t RPVC_SB_Publish(RPVC_SbMsgHandle_t messageHandle)
     bool publishedToAtLeastOne = false;
 
     RPVC_SbRouteEntry_t *entry = &g_sbState.routes[msgId];
-    for (size_t j = 0; j < MAX_SUBSCRIBERS; j++) {
+    for (size_t j = 0; j < RPVC_SB_MAX_SUBSCRIBERS; j++) {
         RPVC_SbSubscriberId_t subscriberId = entry->subscriberIds[j];
 
         if (subscriberId != NOT_VALID_SUBSCRIBER_ID) {
             RPVC_SbPip_t *pipe = &g_sbState.pipes[subscriberId];
 
-            if (pipe->isInitialized && pipe->queue.count < MAX_QUEUE_DEPTH) {
+            if (pipe->isInitialized && pipe->queue.count < RPVC_SB_MAX_QUEUE_DEPTH) {
                 addMessageToPipe(pipe, messageHandle);
                 publishedToAtLeastOne = true;
             }
@@ -217,7 +211,7 @@ RPVC_Status_t RPVC_SB_Publish(RPVC_SbMsgHandle_t messageHandle)
 static void grabAndPopMessageFromPipe(RPVC_SbPip_t *pipe, RPVC_SbMsgHandle_t *outMessageHandle) 
 {
     size_t headIndex = pipe->queue.head;
-    pipe->queue.head = (headIndex + 1) % MAX_QUEUE_DEPTH;
+    pipe->queue.head = (headIndex + 1) % RPVC_SB_MAX_QUEUE_DEPTH;
     pipe->queue.count--;
 
     RPVC_SbMsgHandle_t message = pipe->queue.buffer[headIndex];
@@ -281,7 +275,7 @@ RPVC_Status_t RPVC_SB_CreateMessage(RPVC_SbMsgId_t messageId, const uint8_t *mes
         return status;
     }
 
-    size_t trueSize = messageSize > MAX_PAYLOAD_SIZE ? MAX_PAYLOAD_SIZE : messageSize;
+    size_t trueSize = messageSize > RPVC_SB_MAX_PAYLOAD_SIZE ? RPVC_SB_MAX_PAYLOAD_SIZE : messageSize;
     newmessage->messageId = messageId;
     memcpy(newmessage->payload, messageData, trueSize);
     newmessage->len = trueSize;

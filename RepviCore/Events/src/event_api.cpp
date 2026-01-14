@@ -36,6 +36,19 @@ RPVC_Status_t RPVC_EVENT_RegisterHandler(RPVC_EventCallback_t callback)
     return EventManager::registerHandler(callback);
 }
 
+RPVC_Status_t RPVC_EVENT_UnregisterHandler(RPVC_EventCallback_t callback)
+{
+    if (!g_isInitialized) {
+        return RPVC_ERR_NOT_READY;
+    }
+
+    if (callback == nullptr) {
+        return RPVC_ERR_INVALID_ARG;
+    }
+
+    return EventManager::unregisterHandler(callback);
+}
+
 RPVC_Status_t RPVC_EVENT_Record(const RPVC_EventPacket_t *eventPacket) 
 {
     if (!g_isInitialized) {

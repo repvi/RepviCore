@@ -1,10 +1,12 @@
 #include "MemoryPoolInternal.hpp"
 
 namespace RPVC {
-    MemoryPool<1024 * 5, 32> memoryPool32_;
-    MemoryPool<1024 * 10, 64> memoryPool64_;
-    MemoryPool<1024 * 20, 128> memoryPool128_;
+    MemoryPool<MemoryPoolManager::MEMPOOL32_BUFFER_SIZE, MemoryPoolManager::MEMPOOL32_BLOCK_SIZE> MemoryPoolManager::memoryPool32_;
+    MemoryPool<MemoryPoolManager::MEMPOOL64_BUFFER_SIZE, MemoryPoolManager::MEMPOOL64_BLOCK_SIZE> MemoryPoolManager::memoryPool64_;
+    MemoryPool<MemoryPoolManager::MEMPOOL128_BUFFER_SIZE, MemoryPoolManager::MEMPOOL128_BLOCK_SIZE> MemoryPoolManager::memoryPool128_;
 
+    bool MemoryPoolManager::isInitialized_ = false;
+    
     RPVC_Status_t MemoryPoolManager::Init()
     {
         if (memoryPool32_.Init() != RPVC_OK) {

@@ -103,10 +103,17 @@ namespace RPVC {
 
         private:
 
+        static constexpr int MEMPOOL32_BUFFER_SIZE = 1024 * 5;
+        static constexpr int MEMPOOL64_BUFFER_SIZE = 1024 * 10;
+        static constexpr int MEMPOOL128_BUFFER_SIZE = 1024 * 20;
 
-        static MemoryPool<1024 * 5, 32> memoryPool32_;
-        static MemoryPool<1024 * 10, 64> memoryPool64_;
-        static MemoryPool<1024 * 20, 128> memoryPool128_;
+        static constexpr int MEMPOOL32_BLOCK_SIZE = 32;
+        static constexpr int MEMPOOL64_BLOCK_SIZE = 64;
+        static constexpr int MEMPOOL128_BLOCK_SIZE = 128;
+        
+        static MemoryPool<MEMPOOL32_BUFFER_SIZE, MEMPOOL32_BLOCK_SIZE> memoryPool32_;
+        static MemoryPool<MEMPOOL64_BUFFER_SIZE, MEMPOOL64_BLOCK_SIZE> memoryPool64_;
+        static MemoryPool<MEMPOOL128_BUFFER_SIZE, MEMPOOL128_BLOCK_SIZE> memoryPool128_;
 
         static bool isInitialized_;
     };

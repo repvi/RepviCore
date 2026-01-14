@@ -11,13 +11,14 @@ namespace repvicore {
         public:
         static RPVC_Status_t Init(void);
         static RPVC_Status_t registerHandler(RPVC_EventCallback_t callback);
+        static RPVC_Status_t unregisterHandler(RPVC_EventCallback_t callback);
         static RPVC_Status_t recordEvent(const RPVC_EventPacket_t *eventPacket);
         static void dispatch(void);
 
         private:
         static constexpr int MAX_EVENT_CALLBACKS = 10;
         static constexpr int MAX_EVENT_QUEUE_SIZE = 20;
-        static RPVC_EventCallback_t eventCallback[MAX_EVENT_CALLBACKS];
+        static RPVC_EventCallback_t eventCallbacks[MAX_EVENT_CALLBACKS];
         static uint8_t eventCallbackCount;
 
         static RPVC_EventPacket_t eventQueue[MAX_EVENT_QUEUE_SIZE];
